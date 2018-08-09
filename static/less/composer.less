@@ -1,0 +1,32 @@
+.composer {
+	.write-container {
+		display: block;
+		margin-bottom: 1.5rem;
+// 		overflow: hidden;
+
+		textarea {
+			display: none;
+		}
+
+		.ql-container {
+			height: ~"calc(100% - 42px)";
+		}
+
+		.ql-toolbar {
+			.ql-foobar::after {
+				content: 'A';
+			}
+		}
+	}
+
+// 	.title-container .title {
+// 		white-space: nowrap;
+// 		overflow: hidden;
+// 		text-overflow: ellipsis;
+// 	}
+}
+
+/* Safari bug.. */
+.composer {
+	user-select: initial;
+}
