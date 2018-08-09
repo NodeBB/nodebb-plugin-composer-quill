@@ -31,27 +31,30 @@ define('quill-nbb', [
         // Configure toolbar
         var toolbarHandlers = formatting.getDispatchTable();
         var group = [];
-        console.log(toolbarHandlers, data.formatting);
         data.formatting.forEach(function (option) {
             group.push(option.name);
-            toolbarOptions.handlers[option.name] = toolbarHandlers[option.name];
-            console.log('added', option.name);
+            if (toolbarHandlers[option.name]) {
+                toolbarOptions.handlers[option.name] = toolbarHandlers[option.name].bind(targetEl);
+            }
         });
         toolbarOptions.container.push(group);
-        console.log(toolbarOptions);
 
+        // Quill...
         var quill = new Quill(targetEl.get(0), {
             theme: 'snow',
             modules: {
                 toolbar: toolbarOptions,
             }
         });
+        targetEl.data('quill', quill);
+        targetEl.find('.ql-editor').addClass('write');
 
+        // Configure toolbar icons (must be done after quill itself is instantiated)
         data.formatting.forEach(function (option) {
-            var targetEl = $('.ql-' + option.name);
-            targetEl.html('<i class="' + option.className + '"></i>');
+            var buttonEl = targetEl.siblings('.ql-toolbar').find('.ql-' + option.name);
+            buttonEl.html('<i class="' + option.className + '"></i>');
             if (option.mobile) {
-                targetEl.addClass('visible-xs');
+                buttonEl.addClass('visible-xs');
             }
         });
 
@@ -122,10 +125,6 @@ define('quill-nbb', [
         scrollStop.apply(targetEl);
         autocomplete.init(postContainer);
         resize.reposition(postContainer);
-    });
-
-    $(window).on('composer:toolbar.addButton', function (ev, data) {
-        console.log(data);
     });
 
     // $(window).on('action:chat.loaded', function (e, containerEl) {
