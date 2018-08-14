@@ -9,9 +9,10 @@ define('quill-nbb', [
     'composer/autocomplete',
     'composer/resize',
     'composer/formatting',
-    'scrollStop'
-], function (Quill, composer, translator, autocomplete, resize, formatting, scrollStop) {
-    function init (targetEl, data) {
+    'scrollStop',
+    'components',
+], function (Quill, composer, translator, autocomplete, resize, formatting, scrollStop, components) {
+    function init (targetEl, data, callback) {
         var textDirection = $('html').attr('data-dir');
         var textareaEl = targetEl.siblings('textarea');
         var toolbarOptions = {
@@ -21,7 +22,7 @@ define('quill-nbb', [
                 ['blockquote', 'code-block'],
                 [{ 'list': 'ordered'}, { 'list': 'bullet' }],
                 [{ 'script': 'sub'}, { 'script': 'super' }],    // superscript/subscript
-                [{ 'color': [] }, { 'background': [] }],          // dropdown with defaults from theme
+                [{ 'color': [] }, { 'background': [] }],        // dropdown with defaults from theme
                 [{ 'align': [] }],
                 ['clean']
             ],
@@ -41,7 +42,7 @@ define('quill-nbb', [
 
         // Quill...
         var quill = new Quill(targetEl.get(0), {
-            theme: 'snow',
+            theme: data.theme || 'snow',
             modules: {
                 toolbar: toolbarOptions,
             }
@@ -51,7 +52,8 @@ define('quill-nbb', [
 
         // Configure toolbar icons (must be done after quill itself is instantiated)
         data.formatting.forEach(function (option) {
-            var buttonEl = targetEl.siblings('.ql-toolbar').find('.ql-' + option.name);
+            var toolbarEl = targetEl.siblings('.ql-toolbar').length ? targetEl.siblings('.ql-toolbar') : targetEl.find('.ql-toolbar');
+            var buttonEl = toolbarEl.find('.ql-' + option.name);
             buttonEl.html('<i class="' + option.className + '"></i>');
             if (option.mobile) {
                 buttonEl.addClass('visible-xs');
@@ -66,7 +68,7 @@ define('quill-nbb', [
         $(window).off('action:quill.load');
 
         // Restore text if contained in composerData
-        if (data.composerData.body) {
+        if (data.composerData && data.composerData.body) {
             try {
                 var unescaped = data.composerData.body.replace(/&quot;/g, '"');
                 quill.setContents(JSON.parse(unescaped), 'api');
@@ -78,16 +80,13 @@ define('quill-nbb', [
         // Update textarea on text-change event. This allows compatibility with
         // how NodeBB handles things like drafts, etc.
         quill.on('text-change', function () {
+            console.log(quill.getContents(), textareaEl);
             textareaEl.val(JSON.stringify(quill.getContents()));
         });
 
         // Handle tab/enter for autocomplete
         var doAutocomplete = function () {
-            if ($('.composer-autocomplete-dropdown-' + data.post_uuid + ':visible').length) {
-                return false;
-            } else {
-                return true;
-            }
+            return !$('.composer-autocomplete-dropdown-' + data.post_uuid + ':visible').length;
         };
         [9, 13].forEach(function (keyCode) {
             quill.keyboard.addBinding({
@@ -105,6 +104,10 @@ define('quill-nbb', [
         //         '_csrf': config.csrf_token
         //     },
         // };
+
+        if (typeof callback === 'function') {
+            callback();
+        }
     };
 
     $(window).on('action:composer.loaded', function (ev, data) {
@@ -142,19 +145,40 @@ define('quill-nbb', [
         resize.reposition(postContainer);
     });
 
-    // $(window).on('action:chat.loaded', function (e, containerEl) {
-    //     var composerEl = $(containerEl).find('[component="chat/composer"]');
-    //     var inputEl = composerEl.find('textarea.chat-input');
+    $(window).on('action:chat.loaded', function (e, containerEl) {
+        // Create div element for composer
+        var targetEl = $('<div></div>').insertBefore(components.get('chat/input'));
 
-    //     redactorify(inputEl, {
-    //         height: 120,
-    //         onChange: function () {
-    //             var element = $('[component="chat/messages"]').find('[component="chat/message/remaining"]')
-    //             var curLength = this.code.get().length;
-    //             element.text(config.maximumChatMessageLength - curLength);
-    //         }
-    //     });
-    // });
+        var onInit = function () {
+            autocomplete.init($(containerEl));
+        }
+
+        if (composer.formatting) {
+            init(targetEl, {
+                formatting: composer.formatting,
+                theme: 'bubble',
+            }, onInit);
+        } else {
+            socket.emit('plugins.composer.getFormattingOptions', function(err, options) {
+                composer.formatting = options;
+                init(targetEl, {
+                    formatting: composer.formatting,
+                    theme: 'bubble',
+                }, onInit);
+            });
+        }
+        // var composerEl = $(containerEl).find('[component="chat/composer"]');
+        // var inputEl = composerEl.find('textarea.chat-input');
+
+        // redactorify(inputEl, {
+        //     height: 120,
+        //     onChange: function () {
+        //         var element = $('[component="chat/messages"]').find('[component="chat/message/remaining"]')
+        //         var curLength = this.code.get().length;
+        //         element.text(config.maximumChatMessageLength - curLength);
+        //     }
+        // });
+    });
 
     // $(window).on('action:chat.sent', function (e, data) {
     //     // Empty chat input

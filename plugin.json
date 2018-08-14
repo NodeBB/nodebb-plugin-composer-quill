@@ -10,11 +10,12 @@
 		{ "hook": "filter:parse.raw", "method": "parseRaw" }
 	],
 	"css": [
-		"./node_modules/quill/dist/quill.snow.css"
+		"./node_modules/quill/dist/quill.snow.css",
+		"./node_modules/quill/dist/quill.bubble.css"
 	],
 	"less": [
 		"../nodebb-plugin-composer-default/static/less/composer.less",
-		"./static/less/composer.less"
+		"./static/less/overrides.less"
 	],
 	"modules": {
 		"quill.js": "./node_modules/quill/dist/quill.js"

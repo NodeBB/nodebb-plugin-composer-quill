@@ -30,3 +30,15 @@
 .composer {
 	user-select: initial;
 }
+
+[component="chat/composer"] {
+	> div {
+		border: 1px solid @gray-lighter;
+		flex: 1;
+		height: 52px;
+	}
+
+	[component="chat/input"] {
+		display: none;
+	}
+}
