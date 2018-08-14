@@ -81,6 +81,21 @@ define('quill-nbb', [
             textareaEl.val(JSON.stringify(quill.getContents()));
         });
 
+        // Handle tab/enter for autocomplete
+        var doAutocomplete = function () {
+            if ($('.composer-autocomplete-dropdown-' + data.post_uuid + ':visible').length) {
+                return false;
+            } else {
+                return true;
+            }
+        };
+        [9, 13].forEach(function (keyCode) {
+            quill.keyboard.addBinding({
+                key: keyCode,
+            }, doAutocomplete);
+            quill.keyboard.bindings[keyCode].unshift(quill.keyboard.bindings[keyCode].pop());
+        });
+
         // var options = {
         //     direction: textDirection || undefined,
         //     imageUploadFields: {
@@ -123,7 +138,7 @@ define('quill-nbb', [
         // }
 
         scrollStop.apply(targetEl);
-        autocomplete.init(postContainer);
+        autocomplete.init(postContainer, data.post_uuid);
         resize.reposition(postContainer);
     });
 
