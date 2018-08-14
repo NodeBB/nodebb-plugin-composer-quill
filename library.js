@@ -59,25 +59,28 @@ plugin.addAdminNavigation = function(header, callback) {
 };
 
 plugin.parsePost = function (data, callback) {
-	try {
-		var unescaped = data.postData.content.replace(/&quot;/g, '"');
-		var content = JSON.parse(unescaped);
-		var converter = new QuillDeltaToHtmlConverter(content.ops, {});
-		
-		data.postData.content = converter.convert();
-	} catch (e) {
-		// Post content not in expected format -- do nothing
-		winston.verbose('[composer-quill] pid ' + data.postData.pid + ' content not in expected format, skipping.');
-	}
-
-	callback(null, data);
+	plugin.parseRaw(data.postData.content, function (err, parsed) {
+		data.postData.content = parsed;
+		callback(null, data);
+	});
 };
 
 plugin.parseRaw = function (raw, callback) {
-	// Empty if quill delta, otherwise pass-through
-	if (raw.startsWith('{"ops":[{')) {
-		raw = '';
+	try {
+		var unescaped = raw.replace(/&quot;/g, '"');
+		var content = JSON.parse(unescaped);
+		var converter = new QuillDeltaToHtmlConverter(content.ops, {});
+		
+		raw = converter.convert();
+	} catch (e) {
+		// Do nothing
+		winston.verbose('[composer-quill] Input not in expected format, skipping.');
 	}
+
+	// // Empty if quill delta, otherwise pass-through
+	// if (raw.startsWith('{"ops":[{')) {
+	// 	raw = '';
+	// }
 
 	callback(null, raw);
 };

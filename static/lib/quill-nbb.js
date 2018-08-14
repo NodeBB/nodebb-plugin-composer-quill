@@ -80,7 +80,6 @@ define('quill-nbb', [
         // Update textarea on text-change event. This allows compatibility with
         // how NodeBB handles things like drafts, etc.
         quill.on('text-change', function () {
-            console.log(quill.getContents(), textareaEl);
             textareaEl.val(JSON.stringify(quill.getContents()));
         });
 
@@ -167,22 +166,11 @@ define('quill-nbb', [
                 }, onInit);
             });
         }
-        // var composerEl = $(containerEl).find('[component="chat/composer"]');
-        // var inputEl = composerEl.find('textarea.chat-input');
-
-        // redactorify(inputEl, {
-        //     height: 120,
-        //     onChange: function () {
-        //         var element = $('[component="chat/messages"]').find('[component="chat/message/remaining"]')
-        //         var curLength = this.code.get().length;
-        //         element.text(config.maximumChatMessageLength - curLength);
-        //     }
-        // });
     });
 
-    // $(window).on('action:chat.sent', function (e, data) {
-    //     // Empty chat input
-    //     var redactor = $('.chat-modal[data-roomid="' + data.roomId + '"] .chat-input, .expanded-chat[data-roomid="' + data.roomId + '"] .chat-input').redactor('core.object');
-    //     redactor.code.set('');
-    // });
+    $(window).on('action:chat.sent', function (e, data) {
+        // Empty chat input
+        var quill = $('.chat-modal[data-roomid="' + data.roomId + '"] .ql-container, .expanded-chat[data-roomid="' + data.roomId + '"] .ql-container').data('quill');
+        quill.deleteText(0, quill.getLength());
+    });
 });
