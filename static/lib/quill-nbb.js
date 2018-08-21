@@ -12,6 +12,10 @@ define('quill-nbb', [
     'scrollStop',
     'components',
 ], function (Quill, composer, translator, autocomplete, resize, formatting, scrollStop, components) {
+    var quillNbb = {
+        uploads: {},
+    };
+
     function init (targetEl, data, callback) {
         var textDirection = $('html').attr('data-dir');
         var textareaEl = targetEl.siblings('textarea');
@@ -38,6 +42,14 @@ define('quill-nbb', [
                 toolbarOptions.handlers[option.name] = toolbarHandlers[option.name].bind(targetEl);
             }
         });
+        // -- upload privileges
+        ['upload:post:file', 'upload:post:image'].forEach(function (privilege) {
+            if (app.user.privileges[privilege]) {
+                var name = privilege === 'upload:post:image' ? 'picture' : 'upload';
+                group.unshift(name);
+                toolbarOptions.handlers[name] = toolbarHandlers[name].bind($('.formatting-bar'));
+            }
+        });
         toolbarOptions.container.push(group);
 
         // Quill...
@@ -51,12 +63,19 @@ define('quill-nbb', [
         targetEl.find('.ql-editor').addClass('write');
 
         // Configure toolbar icons (must be done after quill itself is instantiated)
+        var toolbarEl = targetEl.siblings('.ql-toolbar').length ? targetEl.siblings('.ql-toolbar') : targetEl.find('.ql-toolbar');
         data.formatting.forEach(function (option) {
-            var toolbarEl = targetEl.siblings('.ql-toolbar').length ? targetEl.siblings('.ql-toolbar') : targetEl.find('.ql-toolbar');
             var buttonEl = toolbarEl.find('.ql-' + option.name);
             buttonEl.html('<i class="' + option.className + '"></i>');
             if (option.mobile) {
                 buttonEl.addClass('visible-xs');
+            }
+        });
+        ['upload:post:image', 'upload:post:file'].forEach(function (privilege) {
+            if (app.user.privileges[privilege]) {
+                var className = privilege === 'upload:post:image' ? 'picture' : 'upload';
+                var buttonEl = toolbarEl.find('.ql-' + className);
+                buttonEl.html('<i class="fa fa' + (privilege === 'upload:post:image' ? '-cloud' : '') + '-upload"></i>');
             }
         });
 
@@ -152,6 +171,7 @@ define('quill-nbb', [
             autocomplete.init($(containerEl));
         }
 
+        // Load formatting options into DOM on-demand
         if (composer.formatting) {
             init(targetEl, {
                 formatting: composer.formatting,
@@ -172,5 +192,55 @@ define('quill-nbb', [
         // Empty chat input
         var quill = $('.chat-modal[data-roomid="' + data.roomId + '"] .ql-container, .expanded-chat[data-roomid="' + data.roomId + '"] .ql-container').data('quill');
         quill.deleteText(0, quill.getLength());
+    });
+
+    $(window).on('action:composer.uploadUpdate', function (e, data) {
+        var quill = components.get('composer').filter('[data-uuid="' + data.post_uuid + '"]').find('.ql-container').data('quill');
+        var alertId = utils.slugify([data.post_uuid, data.filename].join('-'));
+
+        if (data.text.startsWith('/')) {
+            app.removeAlert(alertId);
+
+            // Image vs. file upload
+            if (quillNbb.uploads[data.filename].isImage) {
+                quill.insertEmbed(quill.getSelection().index, 'image', window.location.origin + data.text);
+            } else {
+                var selection = quill.getSelection();
+
+                if (selection.length) {
+                    var linkText = quill.getText(selection.index, selection.length);
+                    quill.deleteText(selection.index, selection.length);
+                    quill.insertText(selection.index, linkText, {
+                        link: data.text
+                    });
+                } else {
+                    quill.insertText(selection.index, data.filename, {
+                        link: data.text
+                    });
+                }
+            }
+
+            delete quillNbb.uploads[data.filename];
+        } else {
+            app.alert({
+                alert_id: alertId,
+                title: data.filename.replace(/\d_\d+_/, ''),
+                message: data.text,
+                timeout: 1000,
+            });
+        }
+    });
+
+    $(window).on('action:composer.uploadStart', function (e, data) {
+        data.files.forEach(function (file) {
+            app.alert({
+                alert_id: utils.slugify([data.post_uuid, file.filename].join('-')),
+                title: file.filename.replace(/\d_\d+_/, ''),
+                message: data.text,
+            });
+            quillNbb.uploads[file.filename] = {
+                isImage: file.isImage,
+            };
+        });
     });
 });
