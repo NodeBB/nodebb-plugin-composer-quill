@@ -19,30 +19,26 @@
 		</nav>
 		<div class="row title-container">
 			<!-- IF showHandleInput -->
-			<div class="col-sm-3 col-md-12">
+			<div>
 				<input class="handle form-control" type="text" tabindex="1" placeholder="[[topic:composer.handle_placeholder]]" value="{handle}" />
 			</div>
-			<div class="<!-- IF isTopic -->col-lg-9<!-- ELSE -->col-lg-12<!-- ENDIF isTopic --> col-md-12">
-				<!-- IF isTopicOrMain -->
-				<input class="title form-control" type="text" tabindex="1" placeholder="[[topic:composer.title_placeholder]]" value="{title}"/>
-				<!-- ELSE -->
-				<span class="title form-control">[[topic:composer.replying_to, "{title}"]]</span>
-				<!-- ENDIF isTopicOrMain -->
-			</div>
-			<!-- ELSE -->
-			<div class="<!-- IF isTopic -->col-lg-9<!-- ELSE -->col-lg-12<!-- ENDIF isTopic --> col-md-12">
-				<!-- IF isTopicOrMain -->
-				<input class="title form-control" type="text" tabindex="1" placeholder="[[topic:composer.title_placeholder]]" value="{title}"/>
-				<!-- ELSE -->
-				<span class="title form-control">[[topic:composer.replying_to, "{title}"]]</span>
-				<!-- ENDIF isTopicOrMain -->
-			</div>
 			<!-- ENDIF showHandleInput -->
-			<!-- IF isTopic -->
-			<div class="category-list-container col-lg-3 col-md-12 hidden-sm hidden-xs">
-
+			<div>
+				<!-- IF isTopicOrMain -->
+				<input class="title form-control" type="text" tabindex="1" placeholder="[[topic:composer.title_placeholder]]" value="{title}"/>
+				<!-- ELSE -->
+				<span class="title form-control">[[topic:composer.replying_to, "{title}"]]</span>
+				<!-- ENDIF isTopicOrMain -->
 			</div>
+			<!-- IF isTopic -->
+			<div class="category-list-container hidden-sm hidden-xs"></div>
 			<!-- ENDIF isTopic -->
+
+			<div class="btn-group pull-right action-bar hidden-sm hidden-xs">
+				<button class="btn btn-default composer-discard" data-action="discard" tabindex="-1"><i class="fa fa-times"></i> [[topic:composer.discard]]</button>
+
+				<button class="btn btn-primary composer-submit" data-action="post" tabindex="6"><i class="fa fa-check"></i> [[topic:composer.submit]]</button>
+			</div>
 		</div>
 
 		<div class="category-tag-row">
@@ -103,12 +99,6 @@
 						<![endif]-->
 					</form>
 				</ul>
-
-				<div class="btn-group pull-right action-bar hidden-sm hidden-xs">
-					<button class="btn btn-default composer-discard" data-action="discard" tabindex="-1"><i class="fa fa-times"></i> [[topic:composer.discard]]</button>
-
-					<button class="btn btn-primary composer-submit" data-action="post" tabindex="6"><i class="fa fa-check"></i> [[topic:composer.submit]]</button>
-				</div>
 			</div>
 		</div>
 

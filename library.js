@@ -77,34 +77,29 @@ plugin.parseRaw = function (raw, callback) {
 		winston.verbose('[composer-quill] Input not in expected format, skipping.');
 	}
 
-	// // Empty if quill delta, otherwise pass-through
-	// if (raw.startsWith('{"ops":[{')) {
-	// 	raw = '';
-	// }
-
 	callback(null, raw);
 };
 
-// plugin.build = function(data, callback) {
-// 	// No plans for a standalone composer route, so handle redirection on f5
-// 	var req = data.req;
-// 	var res = data.res;
+plugin.build = function(data, callback) {
+	// No plans for a standalone composer route, so handle redirection on f5
+	var req = data.req;
+	var res = data.res;
 
-// 	if (req.query.p) {
-// 		if (!res.locals.isAPI) {
-// 			if (req.query.p.startsWith(nconf.get('relative_path'))) {
-// 				req.query.p = req.query.p.replace(nconf.get('relative_path'), '');
-// 			}
+	if (req.query.p) {
+		if (!res.locals.isAPI) {
+			if (req.query.p.startsWith(nconf.get('relative_path'))) {
+				req.query.p = req.query.p.replace(nconf.get('relative_path'), '');
+			}
 
-// 			return helpers.redirect(res, req.query.p);
-// 		} else {
-// 			return res.render('', {});
-// 		}
-// 	} else if (!req.query.pid && !req.query.tid && !req.query.cid) {
-// 		return helpers.redirect(res, '/');
-// 	}
+			return helpers.redirect(res, req.query.p);
+		} else {
+			return res.render('', {});
+		}
+	} else if (!req.query.pid && !req.query.tid && !req.query.cid) {
+		return helpers.redirect(res, '/');
+	}
 
-// 	callback(null, data);
-// }
+	callback(null, data);
+}
 
 module.exports = plugin;
