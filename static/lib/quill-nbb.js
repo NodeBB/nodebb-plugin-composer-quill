@@ -9,9 +9,8 @@ define('quill-nbb', [
     'composer/autocomplete',
     'composer/resize',
     'composer/formatting',
-    'scrollStop',
     'components',
-], function (Quill, composer, translator, autocomplete, resize, formatting, scrollStop, components) {
+], function (Quill, composer, translator, autocomplete, resize, formatting, components) {
     var quillNbb = {
         uploads: {},
     };
@@ -158,7 +157,6 @@ define('quill-nbb', [
         //   });
         // }
 
-        scrollStop.apply(targetEl);
         autocomplete.init(postContainer, data.post_uuid);
         resize.reposition(postContainer);
     });
