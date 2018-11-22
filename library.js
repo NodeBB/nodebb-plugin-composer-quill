@@ -1,29 +1,33 @@
-"use strict";
+'use strict';
 
-var controllers = require('./lib/controllers');
-var SocketPlugins = require.main.require('./src/socket.io/plugins');
-var defaultComposer = module.parent.require('nodebb-plugin-composer-default');
-var plugins = module.parent.exports;
-var meta = module.parent.require('./meta');
-var helpers = module.parent.require('./controllers/helpers');
-var async = module.parent.require('async');
-var winston = module.parent.require('winston');
-var nconf = module.parent.require('nconf');
+const SocketPlugins = require.main.require('./src/socket.io/plugins');
+const defaultComposer = require.main.require('nodebb-plugin-composer-default');
+const plugins = module.parent.exports;
+const meta = require.main.require('./src/meta');
+const helpers = require.main.require('./src/controllers/helpers');
 
-var QuillDeltaToHtmlConverter = require('quill-delta-to-html');
+const async = require('async');
+const winston = require.main.require('winston');
+const nconf = require.main.require('nconf');
 
-var plugin = {};
+const QuillDeltaToHtmlConverter = require('quill-delta-to-html');
+const controllers = require('./lib/controllers');
 
-plugin.init = function(data, callback) {
-	var router = data.router;
-	var hostMiddleware = data.middleware;
-	var hostControllers = data.controllers;
+const plugin = {};
+
+plugin.init = function (data, callback) {
+	const router = data.router;
+	const hostMiddleware = data.middleware;
 
 	router.get('/admin/plugins/composer-quill', hostMiddleware.admin.buildHeader, controllers.renderAdminPage);
 	router.get('/api/admin/plugins/composer-quill', controllers.renderAdminPage);
 
 	// Expose the default composer's socket method calls for this composer as well
-	plugin.checkCompatibility(function(err, checks) {
+	plugin.checkCompatibility(function (err, checks) {
+		if (err) {
+			return winston.error('[plugin/composer-quill] Error initialising plugin: ' + err.message);
+		}
+
 		if (checks.composer) {
 			SocketPlugins.composer = defaultComposer.socketMethods;
 		} else {
@@ -34,25 +38,25 @@ plugin.init = function(data, callback) {
 	callback();
 };
 
-plugin.checkCompatibility = function(callback) {
+plugin.checkCompatibility = function (callback) {
 	async.parallel({
 		active: async.apply(plugins.getActive),
-		markdown: async.apply(meta.settings.get, 'markdown')
-	}, function(err, data) {
-		callback(null, {
+		markdown: async.apply(meta.settings.get, 'markdown'),
+	}, function (err, data) {
+		callback(err, {
 			markdown: data.active.indexOf('nodebb-plugin-markdown') === -1,	// plugin disabled
-			composer: data.active.filter(function(plugin) {
+			composer: data.active.filter(function (plugin) {
 				return plugin.startsWith('nodebb-plugin-composer-') && plugin !== 'nodebb-plugin-composer-quill';
-			}).length === 0
-		})
+			}).length === 0,
+		});
 	});
 };
 
-plugin.addAdminNavigation = function(header, callback) {
+plugin.addAdminNavigation = function (header, callback) {
 	header.plugins.push({
 		route: '/plugins/composer-quill',
 		icon: 'fa-edit',
-		name: 'Quill (Composer)'
+		name: 'Quill (Composer)',
 	});
 
 	callback(null, header);
@@ -61,7 +65,7 @@ plugin.addAdminNavigation = function(header, callback) {
 plugin.parsePost = function (data, callback) {
 	plugin.parseRaw(data.postData.content, function (err, parsed) {
 		data.postData.content = parsed;
-		callback(null, data);
+		callback(err, data);
 	});
 };
 
@@ -70,7 +74,7 @@ plugin.parseRaw = function (raw, callback) {
 		var unescaped = raw.replace(/&quot;/g, '"');
 		var content = JSON.parse(unescaped);
 		var converter = new QuillDeltaToHtmlConverter(content.ops, {});
-		
+
 		raw = converter.convert();
 	} catch (e) {
 		// Do nothing
@@ -80,7 +84,7 @@ plugin.parseRaw = function (raw, callback) {
 	callback(null, raw);
 };
 
-plugin.build = function(data, callback) {
+plugin.build = function (data, callback) {
 	// No plans for a standalone composer route, so handle redirection on f5
 	var req = data.req;
 	var res = data.res;
@@ -92,14 +96,13 @@ plugin.build = function(data, callback) {
 			}
 
 			return helpers.redirect(res, req.query.p);
-		} else {
-			return res.render('', {});
 		}
+		return res.render('', {});
 	} else if (!req.query.pid && !req.query.tid && !req.query.cid) {
 		return helpers.redirect(res, '/');
 	}
 
 	callback(null, data);
-}
+};
 
 module.exports = plugin;
