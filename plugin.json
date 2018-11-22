@@ -6,8 +6,9 @@
 		{ "hook": "static:app.load", "method": "init" },
 		{ "hook": "filter:admin.header.build", "method": "addAdminNavigation" },
 		{ "hook": "filter:composer.build", "method": "build" },
-		{ "hook": "filter:parse.post", "method": "parsePost", "priority": 5 },
-		{ "hook": "filter:parse.raw", "method": "parseRaw", "priority": 5 }
+		{ "hook": "filter:post.create", "method": "save" },
+		{ "hook": "filter:post.edit", "method": "save" },
+		{ "hook": "filter:composer.push", "method": "append" }
 	],
 	"css": [
 		"./node_modules/quill/dist/quill.snow.css",

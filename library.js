@@ -4,13 +4,14 @@ const SocketPlugins = require.main.require('./src/socket.io/plugins');
 const defaultComposer = require.main.require('nodebb-plugin-composer-default');
 const plugins = module.parent.exports;
 const meta = require.main.require('./src/meta');
+const posts = require.main.require('./src/posts').async;
 const helpers = require.main.require('./src/controllers/helpers');
 
 const async = require('async');
 const winston = require.main.require('winston');
 const nconf = require.main.require('nconf');
 
-const QuillDeltaToHtmlConverter = require('quill-delta-to-html');
+const QuillDeltaToHtmlConverter = require('quill-delta-to-html').QuillDeltaToHtmlConverter;
 const controllers = require('./lib/controllers');
 
 const plugin = {};
@@ -62,28 +63,6 @@ plugin.addAdminNavigation = function (header, callback) {
 	callback(null, header);
 };
 
-plugin.parsePost = function (data, callback) {
-	plugin.parseRaw(data.postData.content, function (err, parsed) {
-		data.postData.content = parsed;
-		callback(err, data);
-	});
-};
-
-plugin.parseRaw = function (raw, callback) {
-	try {
-		var unescaped = raw.replace(/&quot;/g, '"');
-		var content = JSON.parse(unescaped);
-		var converter = new QuillDeltaToHtmlConverter(content.ops, {});
-
-		raw = converter.convert();
-	} catch (e) {
-		// Do nothing
-		winston.verbose('[composer-quill] Input not in expected format, skipping.');
-	}
-
-	callback(null, raw);
-};
-
 plugin.build = function (data, callback) {
 	// No plans for a standalone composer route, so handle redirection on f5
 	var req = data.req;
@@ -100,6 +79,31 @@ plugin.build = function (data, callback) {
 		return res.render('', {});
 	} else if (!req.query.pid && !req.query.tid && !req.query.cid) {
 		return helpers.redirect(res, '/');
+	}
+
+	callback(null, data);
+};
+
+plugin.save = (data, callback) => {
+	try {
+		var content = JSON.parse(data.post.content);
+		var converter = new QuillDeltaToHtmlConverter(content.ops, {});
+
+		data.post.quillDelta = data.post.content;
+		data.post.content = converter.convert();
+	} catch (e) {
+		console.log(e);
+		// Do nothing
+		winston.verbose('[composer-quill] Input not in expected format, skipping.');
+	}
+
+	callback(null, data);
+};
+
+plugin.append = async (data, callback) => {
+	const delta = await posts.getPostField(data.pid, 'quillDelta');
+	if (delta) {
+		data.body = delta;
 	}
 
 	callback(null, data);
