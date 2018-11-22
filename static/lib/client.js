@@ -1,4 +1,8 @@
-$(document).ready(function() {
+'use strict';
+
+/* globals $, document, window */
+
+$(document).ready(function () {
 	var wrapWithBlockquote = function (delta) {
 		// Validate the delta
 		try {
@@ -12,26 +16,26 @@ $(document).ready(function() {
 			// Do nothing
 			return delta;
 		}
-	}
-	$(window).on('action:app.load', function() {
-		require(['composer', 'quill-nbb'], function(composer, quillNbb) {
-			$(window).on('action:composer.topic.new', function(ev, data) {
+	};
+	$(window).on('action:app.load', function () {
+		require(['composer', 'quill-nbb'], function (composer) {
+			$(window).on('action:composer.topic.new', function (ev, data) {
 				composer.newTopic({
 					cid: data.cid,
 					title: data.title,
-					body: data.body
+					body: data.body,
 				});
 			});
 
-			$(window).on('action:composer.post.edit', function(ev, data) {
+			$(window).on('action:composer.post.edit', function (ev, data) {
 				composer.editPost(data.pid);
 			});
 
-			$(window).on('action:composer.post.new', function(ev, data) {
+			$(window).on('action:composer.post.new', function (ev, data) {
 				composer.newReply(data.tid, data.pid, data.topicName, data.text);
 			});
 
-			$(window).on('action:composer.addQuote', function(ev, data) {
+			$(window).on('action:composer.addQuote', function (ev, data) {
 				composer.newReply(data.tid, data.pid, data.topicName, wrapWithBlockquote(data.text));
 			});
 		});
