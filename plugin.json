@@ -6,9 +6,10 @@
 		{ "hook": "static:app.load", "method": "init" },
 		{ "hook": "filter:admin.header.build", "method": "addAdminNavigation" },
 		{ "hook": "filter:composer.build", "method": "build" },
-		{ "hook": "filter:post.create", "method": "save" },
-		{ "hook": "filter:post.edit", "method": "save" },
-		{ "hook": "filter:composer.push", "method": "append" }
+		{ "hook": "filter:post.create", "method": "savePost" },
+		{ "hook": "filter:post.edit", "method": "savePost" },
+		{ "hook": "filter:composer.push", "method": "append" },
+		{ "hook": "filter:messaging.save", "method": "saveChat" }
 	],
 	"css": [
 		"./node_modules/quill/dist/quill.snow.css",

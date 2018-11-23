@@ -84,7 +84,7 @@ plugin.build = function (data, callback) {
 	callback(null, data);
 };
 
-plugin.save = (data, callback) => {
+plugin.savePost = (data, callback) => {
 	try {
 		var content = JSON.parse(data.post.content);
 		var converter = new QuillDeltaToHtmlConverter(content.ops, {});
@@ -92,9 +92,23 @@ plugin.save = (data, callback) => {
 		data.post.quillDelta = data.post.content;
 		data.post.content = converter.convert();
 	} catch (e) {
-		console.log(e);
 		// Do nothing
-		winston.verbose('[composer-quill] Input not in expected format, skipping.');
+		winston.verbose('[plugin/composer-quill (post)] Input not in expected format, skipping.');
+	}
+
+	callback(null, data);
+};
+
+plugin.saveChat = (data, callback) => {
+	try {
+		var content = JSON.parse(data.content);
+		var converter = new QuillDeltaToHtmlConverter(content.ops, {});
+
+		data.quillDelta = data.content;
+		data.content = converter.convert();
+	} catch (e) {
+		// Do nothing
+		winston.verbose('[plugin/composer-quill (chat)] Input not in expected format, skipping.');
 	}
 
 	callback(null, data);
