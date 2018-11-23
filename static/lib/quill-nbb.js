@@ -105,6 +105,7 @@ define('quill-nbb', [
 
 		// Handle tab/enter for autocomplete
 		var doAutocomplete = function () {
+			setTimeout(convertEmojiToImages.bind(quill), 0);
 			return !$('.composer-autocomplete-dropdown-' + data.post_uuid + ':visible').length;
 		};
 		[9, 13].forEach(function (keyCode) {
@@ -114,75 +115,66 @@ define('quill-nbb', [
 			quill.keyboard.bindings[keyCode].unshift(quill.keyboard.bindings[keyCode].pop());
 		});
 
-		// var options = {
-		//     direction: textDirection || undefined,
-		//     imageUploadFields: {
-		//         '_csrf': config.csrf_token
-		//     },
-		//     fileUploadFields: {
-		//         '_csrf': config.csrf_token
-		//     },
-		// };
-
 		if (typeof callback === 'function') {
 			callback();
 		}
 	}
 
 	function enableEmojiPlugin(quill) {
-		// Put this somewhere else so it doesn't load every time quill is called maybe
-		var emojiTable = {};
 		socket.emit('plugins.composer-quill.getEmojiTable', {}, function (err, table) {
 			if (err) {
-				emojiTable = {};
+				quillNbb.emojiTable = {};
 			}
 
-			emojiTable = table;
+			quillNbb.emojiTable = table;
 		});
 
-		quill.on('text-change', function (delta) {
-			var contents = quill.getContents();
-			var emojiRegex = /:(\w+):/g;
+		quill.on('text-change', convertEmojiToImages.bind(quill));
+	}
 
-			// Special handling for emoji plugin
-			if (delta.ops.some(command => command.insert && (command.insert === ':' || String(command.insert).endsWith(':')))) {
-				// Check all nodes for emoji shorthand and replace with image
-				contents.reduce((retain, cur) => {
-					var match = emojiRegex.exec(cur.insert);
-					var contents;
-					var emojiObj;
-					while (match !== null) {
-						emojiObj = emojiTable[match[1]];
-						if (emojiObj) {
-							contents = [{
-								insert: 1,
-								attributes: {
-									image: config.relative_path + '/plugins/nodebb-plugin-emoji/emoji/' + emojiObj.pack + '/' + emojiObj.image + '?' + app.cacheBuster,
-									alt: emojiObj.character,
-								},
-							}];
-							if (match[0].length) {
-								contents.unshift({ delete: match[0].length });
-							}
-							if (retain + match.index) {
-								contents.unshift({ retain: retain + match.index });
-							}
+	function convertEmojiToImages(delta) {
+		var quill = this;
+		var contents = quill.getContents();
+		var emojiRegex = /:(\w+):/g;
 
-							quill.updateContents({
-								ops: contents,
-							});
+		// Special handling for emoji plugin
+		if (!delta || delta.ops.some(command => command.insert && (command.insert === ':' || String(command.insert).endsWith(':')))) {
+			// Check all nodes for emoji shorthand and replace with image
+			contents.reduce(function (retain, cur) {
+				var match = emojiRegex.exec(cur.insert);
+				var contents;
+				var emojiObj;
+				while (match !== null) {
+					emojiObj = quillNbb.emojiTable[match[1]];
+					if (emojiObj) {
+						contents = [{
+							insert: 1,
+							attributes: {
+								image: config.relative_path + '/plugins/nodebb-plugin-emoji/emoji/' + emojiObj.pack + '/' + emojiObj.image + '?' + app.cacheBuster,
+								alt: emojiObj.character,
+							},
+						}];
+						if (match[0].length) {
+							contents.unshift({ delete: match[0].length });
+						}
+						if (retain + match.index) {
+							contents.unshift({ retain: retain + match.index });
 						}
 
-						// Reset search and continue
-						emojiRegex.lastIndex = retain + match.index + 1;
-						match = emojiRegex.exec(cur.insert);
+						quill.updateContents({
+							ops: contents,
+						});
 					}
 
-					retain += cur.insert.length || 1;
-					return retain;
-				}, 0);
-			}
-		});
+					// Reset search and continue
+					emojiRegex.lastIndex = retain + match.index + 1;
+					match = emojiRegex.exec(cur.insert);
+				}
+
+				retain += cur.insert.length || 1;
+				return retain;
+			}, 0);
+		}
 	}
 
 	$(window).on('action:composer.loaded', function (ev, data) {
