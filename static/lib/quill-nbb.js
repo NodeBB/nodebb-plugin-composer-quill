@@ -194,6 +194,11 @@ define('quill-nbb', [
 		// Empty chat input
 		var quill = $('.chat-modal[data-roomid="' + data.roomId + '"] .ql-container, .expanded-chat[data-roomid="' + data.roomId + '"] .ql-container').data('quill');
 		quill.deleteText(0, quill.getLength());
+
+		// Reset text direction
+		var textDirection = $('html').attr('data-dir');
+		quill.format('direction', textDirection);
+		quill.format('align', textDirection === 'rtl' ? 'right' : 'left');
 	});
 
 	$(window).on('action:composer.uploadUpdate', function (evt, data) {
