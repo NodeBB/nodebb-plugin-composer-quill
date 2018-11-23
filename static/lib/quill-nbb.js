@@ -1,6 +1,6 @@
 'use strict';
 
-/* globals $, window, define, socket, app, ajaxify, utils */
+/* globals config, $, window, define, socket, app, ajaxify, utils */
 
 define('quill-nbb', [
 	'quill',
@@ -95,6 +95,8 @@ define('quill-nbb', [
 			}
 		}
 
+		enableEmojiPlugin(quill);
+
 		// Update textarea on text-change event. This allows compatibility with
 		// how NodeBB handles things like drafts, etc.
 		quill.on('text-change', function () {
@@ -125,6 +127,62 @@ define('quill-nbb', [
 		if (typeof callback === 'function') {
 			callback();
 		}
+	}
+
+	function enableEmojiPlugin(quill) {
+		// Put this somewhere else so it doesn't load every time quill is called maybe
+		var emojiTable = {};
+		socket.emit('plugins.composer-quill.getEmojiTable', {}, function (err, table) {
+			if (err) {
+				emojiTable = {};
+			}
+
+			emojiTable = table;
+		});
+
+		quill.on('text-change', function (delta) {
+			var contents = quill.getContents();
+			var emojiRegex = /:(\w+):/g;
+
+			// Special handling for emoji plugin
+			if (delta.ops.some(command => command.insert && (command.insert === ':' || String(command.insert).endsWith(':')))) {
+				// Check all nodes for emoji shorthand and replace with image
+				contents.reduce((retain, cur) => {
+					var match = emojiRegex.exec(cur.insert);
+					var contents;
+					var emojiObj;
+					while (match !== null) {
+						emojiObj = emojiTable[match[1]];
+						if (emojiObj) {
+							contents = [{
+								insert: 1,
+								attributes: {
+									image: config.relative_path + '/plugins/nodebb-plugin-emoji/emoji/' + emojiObj.pack + '/' + emojiObj.image + '?' + app.cacheBuster,
+									alt: emojiObj.character,
+								},
+							}];
+							if (match[0].length) {
+								contents.unshift({ delete: match[0].length });
+							}
+							if (retain + match.index) {
+								contents.unshift({ retain: retain + match.index });
+							}
+
+							quill.updateContents({
+								ops: contents,
+							});
+						}
+
+						// Reset search and continue
+						emojiRegex.lastIndex = retain + match.index + 1;
+						match = emojiRegex.exec(cur.insert);
+					}
+
+					retain += cur.insert.length || 1;
+					return retain;
+				}, 0);
+			}
+		});
 	}
 
 	$(window).on('action:composer.loaded', function (ev, data) {

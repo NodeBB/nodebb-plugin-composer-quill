@@ -31,6 +31,7 @@ plugin.init = function (data, callback) {
 
 		if (checks.composer) {
 			SocketPlugins.composer = defaultComposer.socketMethods;
+			SocketPlugins['composer-quill'] = require('./lib/websockets');
 		} else {
 			winston.warn('[plugin/composer-quill] Another composer plugin is active! Please disable all other composers.');
 		}
