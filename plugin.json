@@ -20,7 +20,8 @@
 		"./static/less/overrides.less"
 	],
 	"modules": {
-		"quill.js": "./node_modules/quill/dist/quill.js"
+		"quill.js": "./node_modules/quill/dist/quill.js",
+		"quill-emoji.js": "./static/lib/emoji.js"
 	},
 	"scripts": [
 		"./static/lib/quill-nbb.js",
