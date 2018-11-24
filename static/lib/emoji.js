@@ -8,13 +8,15 @@ define('quill-emoji', function () {
 	};
 
 	Emoji.enable = function (quill) {
-		socket.emit('plugins.composer-quill.getEmojiTable', {}, function (err, table) {
-			if (err) {
-				app.alertError(err.message);
-			}
+		if (!Object.keys(Emoji.table).length) {
+			socket.emit('plugins.composer-quill.getEmojiTable', {}, function (err, table) {
+				if (err) {
+					app.alertError(err.message);
+				}
 
-			Emoji.table = table;
-		});
+				Emoji.table = table;
+			});
+		}
 
 		quill.on('text-change', Emoji.convert.bind(quill));
 	};
