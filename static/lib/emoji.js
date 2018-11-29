@@ -36,20 +36,18 @@ define('quill-emoji', ['quill'], function (quill) {
 				return formats;
 			}, {});
 		},
-		format: function (name, value) {
-			// this is not called :(
-			console.log(name, value);
-			if (emojiAttributes.indexOf(name) > -1) {
-				if (value) {
-					this.domNode.setAttribute(name, value);
-				} else {
-					this.domNode.removeAttribute(name);
-				}
-			} else {
-				imageBlot.format(name, value);
-			}
-		},
 	});
+	Emoji.blots.emoji.prototype.format = function (name, value) {
+		if (emojiAttributes.includes(name)) {
+			if (value) {
+				this.domNode.setAttribute(name, value);
+			} else {
+				this.domNode.removeAttribute(name);
+			}
+		} else {
+			imageBlot.format(name, value);
+		}
+	};
 	quill.register(Emoji.blots.emoji);
 
 	Emoji.enable = function (quill) {
@@ -86,7 +84,7 @@ define('quill-emoji', ['quill'], function (quill) {
 								emoji: config.relative_path + '/plugins/nodebb-plugin-emoji/emoji/' + emojiObj.pack + '/' + emojiObj.image + '?' + app.cacheBuster,
 							},
 							attributes: {
-								alt: emojiObj.character + 'test',
+								alt: emojiObj.character,
 								class: 'not-responsive emoji emoji-' + emojiObj.pack + ' emoji--' + emojiObj.name,
 							},
 						}];
