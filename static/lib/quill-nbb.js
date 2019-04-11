@@ -196,13 +196,19 @@ define('quill-nbb', [
 
 	$(window).on('action:composer.uploadUpdate', function (evt, data) {
 		var quill = components.get('composer').filter('[data-uuid="' + data.post_uuid + '"]').find('.ql-container').data('quill');
-		var alertId = utils.slugify([data.post_uuid, data.filename].join('-'));
+		var filename = data.filename.replace(/^\d+_\d+_/, '');
+		var alertId = utils.slugify([data.post_uuid, filename].join('-'));
+
+		if (!quillNbb.uploads[filename]) {
+			console.warn('[quill/uploads] Unable to find file (' + filename + ').');
+			return;
+		}
 
 		if (data.text.startsWith('/')) {
 			app.removeAlert(alertId);
 
 			// Image vs. file upload
-			if (quillNbb.uploads[data.filename].isImage) {
+			if (quillNbb.uploads[filename].isImage) {
 				quill.insertEmbed(quill.getSelection().index, 'image', window.location.origin + data.text);
 			} else {
 				var selection = quill.getSelection();
@@ -214,13 +220,13 @@ define('quill-nbb', [
 						link: data.text,
 					});
 				} else {
-					quill.insertText(selection.index, data.filename, {
+					quill.insertText(selection.index, filename, {
 						link: data.text,
 					});
 				}
 			}
 
-			delete quillNbb.uploads[data.filename];
+			delete quillNbb.uploads[filename];
 		} else {
 			app.alert({
 				alert_id: alertId,
