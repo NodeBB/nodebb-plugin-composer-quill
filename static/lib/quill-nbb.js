@@ -22,7 +22,7 @@ define('quill-nbb', [
 			container: [
 				[{ header: [1, 2, 3, 4, 5, 6, false] }], // h1..h6
 				['bold', 'italic', 'underline', 'strike'], // toggled buttons
-				['blockquote', 'code-block'],
+				['link', 'blockquote', 'code-block'],
 				[{ list: 'ordered' }, { list: 'bullet' }],
 				[{ script: 'sub' }, { script: 'super' }], // superscript/subscript
 				[{ color: [] }, { background: [] }], // dropdown with defaults from theme
