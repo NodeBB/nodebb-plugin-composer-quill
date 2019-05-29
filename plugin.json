@@ -23,6 +23,9 @@
 		"quill.js": "./node_modules/quill/dist/quill.js",
 		"quill-emoji.js": "./static/lib/emoji.js"
 	},
+	"acpScripts": [
+		"./static/lib/admin.js"
+	],
 	"scripts": [
 		"./static/lib/quill-nbb.js",
 		"./static/lib/client.js",

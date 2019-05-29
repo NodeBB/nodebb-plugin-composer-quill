@@ -1,6 +1,8 @@
 'use strict';
 
 const SocketPlugins = require.main.require('./src/socket.io/plugins');
+const SocketAdmin = require.main.require('./src/socket.io/admin').plugins;
+SocketAdmin['composer-quill'] = require('./lib/adminsockets.js');
 const defaultComposer = require.main.require('nodebb-plugin-composer-default');
 const plugins = module.parent.exports;
 const meta = require.main.require('./src/meta');
@@ -11,8 +13,8 @@ const async = require('async');
 const winston = require.main.require('winston');
 const nconf = require.main.require('nconf');
 
-const QuillDeltaToHtmlConverter = require('quill-delta-to-html').QuillDeltaToHtmlConverter;
 const controllers = require('./lib/controllers');
+const migrator = require('./lib/migrator');
 
 const plugin = {};
 
@@ -87,37 +89,15 @@ plugin.build = function (data, callback) {
 
 plugin.savePost = (data, callback) => {
 	data.post.quillDelta = data.post.content;
-	data.post.content = toHtml(data.post.content);
+	data.post.content = migrator.toHtml(data.post.content);
 	callback(null, data);
 };
 
 plugin.saveChat = (data, callback) => {
 	data.quillDelta = data.content;
-	data.content = toHtml(data.content);
+	data.content = migrator.toHtml(data.content);
 	callback(null, data);
 };
-
-function toHtml(content) {
-	try {
-		content = JSON.parse(content);
-		var converter = new QuillDeltaToHtmlConverter(content.ops, {});
-
-		// Quill plugin should fire a hook here, passing converter.renderCustomWith
-		// Emoji plugin should take that method and register a listener.
-		// Also toHtml is probably going to end up being asynchronous, then... awaited?
-		converter.renderCustomWith(function (customOp) {
-			if (customOp.insert.type === 'emoji') {
-				return '<img src="' + customOp.insert.value + '" alt="' + customOp.attributes.alt + '" class="' + customOp.attributes.class + '" />';
-			}
-		});
-
-		return converter.convert();
-	} catch (e) {
-		// Do nothing
-		winston.verbose('[plugin/composer-quill (toHtml)] Input not in expected format, skipping.');
-		return false;
-	}
-}
 
 plugin.append = async (data, callback) => {
 	const delta = await posts.getPostField(data.pid, 'quillDelta');
