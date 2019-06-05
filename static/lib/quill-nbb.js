@@ -74,7 +74,11 @@ define('quill-nbb', [
 			if (app.user.privileges[privilege]) {
 				var className = privilege === 'upload:post:image' ? 'picture' : 'upload';
 				var buttonEl = toolbarEl.find('.ql-' + className);
-				buttonEl.html('<i class="fa fa' + (privilege === 'upload:post:image' ? '-cloud' : '') + '-upload"></i>');
+				if (className === 'picture') {
+					buttonEl.html('<i class="fa fa-file-image-o"></i>');
+				} else {
+					buttonEl.html('<span class="fa-stack"><i class="fa fa-file-o fa-stack-1x"></i><i class="fa fa-arrow-up fa-stack-1x"></i></span>');
+				}
 			}
 		});
 
