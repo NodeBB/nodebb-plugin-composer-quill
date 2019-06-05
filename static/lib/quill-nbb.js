@@ -38,7 +38,12 @@ define('quill-nbb', [
 		data.formatting.forEach(function (option) {
 			group.push(option.name);
 			if (toolbarHandlers[option.name]) {
-				toolbarOptions.handlers[option.name] = toolbarHandlers[option.name].bind(targetEl);
+				toolbarOptions.handlers[option.name] = function () {
+					// Chicken-wrapper to pass additional values to handlers (to match composer-default behaviour)
+					var quill = targetEl.data('quill');
+					var selection = quill.getSelection(true);
+					toolbarHandlers[option.name].apply(quill, [textareaEl, selection.index, selection.index + selection.length]);
+				};
 			}
 		});
 		// -- upload privileges
@@ -252,5 +257,16 @@ define('quill-nbb', [
 				isImage: file.isImage,
 			};
 		});
+	});
+
+	$(window).on('action:composer.insertIntoTextarea', function (evt, data) {
+		var selection = data.context.getSelection(true);
+		data.context.insertText(selection.index, data.value);
+		data.preventDefault = true;
+	});
+
+	$(window).on('action:composer.updateTextareaSelection', function (evt, data) {
+		data.context.setSelection(data.start, data.end - data.start);
+		data.preventDefault = true;
 	});
 });
