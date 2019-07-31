@@ -5,8 +5,10 @@ const SocketAdmin = require.main.require('./src/socket.io/admin').plugins;
 SocketAdmin['composer-quill'] = require('./lib/adminsockets.js');
 const defaultComposer = require.main.require('nodebb-plugin-composer-default');
 const plugins = module.parent.exports;
+
+const db = require.main.require('./src/database');
 const meta = require.main.require('./src/meta');
-const posts = require.main.require('./src/posts').async;
+const posts = require.main.require('./src/posts');
 const helpers = require.main.require('./src/controllers/helpers');
 
 const async = require('async');
@@ -97,6 +99,24 @@ plugin.saveChat = (data, callback) => {
 	data.quillDelta = data.content;
 	data.content = migrator.toHtml(data.content);
 	callback(null, data);
+};
+
+plugin.appendDelta = async (data) => {
+	if (!data.fields.includes('content')) {
+		return data;
+	}
+
+	// For each pid, grab the quillDelta and replace content with it
+	const deltas = await db.getObjectsFields(data.pids.map(pid => 'post:' + pid), ['quillDelta']);
+	data.posts = data.posts.map((post, idx) => {
+		if (deltas[idx]) {
+			post.content = deltas[idx].quillDelta;
+		}
+
+		return post;
+	});
+
+	return data;
 };
 
 plugin.append = async (data) => {
