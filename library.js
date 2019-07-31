@@ -99,12 +99,12 @@ plugin.saveChat = (data, callback) => {
 	callback(null, data);
 };
 
-plugin.append = (data, callback) => {
+plugin.append = async (data) => {
 	const delta = await posts.getPostField(data.pid, 'quillDelta');
 	if (delta) {
 		data.body = delta;
 	}
-	callback(null, data);
+	return data;
 };
 
 module.exports = plugin;
