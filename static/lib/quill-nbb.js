@@ -87,10 +87,6 @@ define('quill-nbb', [
 			}
 		});
 
-		// Automatic RTL support
-		quill.format('direction', textDirection);
-		quill.format('align', textDirection === 'rtl' ? 'right' : 'left');
-
 		$(window).trigger('action:quill.load', quill);
 		$(window).off('action:quill.load');
 
@@ -103,6 +99,10 @@ define('quill-nbb', [
 				quill.setContents({ ops: [{ insert: data.composerData.body.toString() }] }, 'api');
 			}
 		}
+
+		// Automatic RTL support
+		quill.format('direction', textDirection);
+		quill.format('align', textDirection === 'rtl' ? 'right' : 'left');
 
 		Emoji.enable(quill);
 
