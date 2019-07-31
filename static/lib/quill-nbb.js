@@ -110,7 +110,6 @@ define('quill-nbb', [
 		// how NodeBB handles things like drafts, etc.
 		quill.on('text-change', function () {
 			if (isEmpty(quill)) {
-				console.log('empty!!');
 				quill.deleteText(0, quill.getLength());
 				textareaEl.val('');
 				return;
@@ -130,6 +129,11 @@ define('quill-nbb', [
 			}, doAutocomplete);
 			quill.keyboard.bindings[keyCode].unshift(quill.keyboard.bindings[keyCode].pop());
 		});
+
+		if (data.composerData.action !== 'topics.post') {
+			// Oddly, a 0ms timeout is required here otherwise .focus() does not work
+			setTimeout(quill.focus.bind(quill), 0);
+		}
 
 		if (typeof callback === 'function') {
 			callback();
