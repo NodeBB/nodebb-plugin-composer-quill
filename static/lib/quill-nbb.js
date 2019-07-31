@@ -130,7 +130,7 @@ define('quill-nbb', [
 			quill.keyboard.bindings[keyCode].unshift(quill.keyboard.bindings[keyCode].pop());
 		});
 
-		if (data.composerData.action !== 'topics.post') {
+		if (!data.composerData || data.composerData.action !== 'topics.post') {
 			// Oddly, a 0ms timeout is required here otherwise .focus() does not work
 			setTimeout(quill.focus.bind(quill), 0);
 		}
