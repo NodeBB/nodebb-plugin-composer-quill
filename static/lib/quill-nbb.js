@@ -109,6 +109,13 @@ define('quill-nbb', [
 		// Update textarea on text-change event. This allows compatibility with
 		// how NodeBB handles things like drafts, etc.
 		quill.on('text-change', function () {
+			if (isEmpty(quill)) {
+				console.log('empty!!');
+				quill.deleteText(0, quill.getLength());
+				textareaEl.val('');
+				return;
+			}
+
 			textareaEl.val(JSON.stringify(quill.getContents()));
 		});
 
@@ -127,6 +134,10 @@ define('quill-nbb', [
 		if (typeof callback === 'function') {
 			callback();
 		}
+	}
+
+	function isEmpty(quill) {
+		return quill.getContents().ops[0].insert === '\n' && quill.getLength() < 2;
 	}
 
 	$(window).on('action:composer.loaded', function (ev, data) {
