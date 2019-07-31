@@ -1,6 +1,6 @@
 'use strict';
 
-/* globals $, window, define, socket, app, ajaxify, utils */
+/* globals $, window, define, socket, app, ajaxify, utils, config */
 
 define('quill-nbb', [
 	'quill',
@@ -116,6 +116,7 @@ define('quill-nbb', [
 			}
 
 			textareaEl.val(JSON.stringify(quill.getContents()));
+			textareaEl.trigger('change');
 		});
 
 		// Handle tab/enter for autocomplete
@@ -283,5 +284,12 @@ define('quill-nbb', [
 	$(window).on('action:composer.updateTextareaSelection', function (evt, data) {
 		data.context.setSelection(data.start, data.end - data.start);
 		data.preventDefault = true;
+	});
+
+	$(window).on('action:chat.updateRemainingLength', function (evt, data) {
+		var quill = data.parent.find('.ql-container').data('quill');
+		var length = quill.getText().length;
+		data.parent.find('[component="chat/message/length"]').text(length);
+		data.parent.find('[component="chat/message/remaining"]').text(config.maximumChatMessageLength - length);
 	});
 });
