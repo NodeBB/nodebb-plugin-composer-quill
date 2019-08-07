@@ -94,10 +94,28 @@ define('quill-nbb', [
 		if (data.composerData && data.composerData.body) {
 			try {
 				var unescaped = data.composerData.body.replace(/&quot;/g, '"');
-				quill.setContents(JSON.parse(unescaped), 'api');
+				var delta = JSON.parse(unescaped);
+				delta.ops.push({
+					insert: '\n',
+					attributes: {
+						direction: textDirection,
+						align: textDirection === 'rtl' ? 'right' : 'left',
+					},
+				});
+				quill.setContents(delta, 'api');
 			} catch (e) {
-				quill.setContents({ ops: [{ insert: data.composerData.body.toString() }] }, 'api');
+				quill.setContents({ ops: [{
+					insert: data.composerData.body.toString(),
+					attributes: {
+						direction: textDirection,
+						align: textDirection === 'rtl' ? 'right' : 'left',
+					},
+				}] }, 'api');
 			}
+
+			// Move cursor to the very end
+			var length = quill.getLength();
+			quill.setSelection(length);
 		}
 
 		// Automatic RTL support
