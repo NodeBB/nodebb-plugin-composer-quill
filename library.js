@@ -6,7 +6,7 @@ SocketAdmin['composer-quill'] = require('./lib/adminsockets.js');
 const defaultComposer = require.main.require('nodebb-plugin-composer-default');
 const plugins = module.parent.exports;
 const meta = require.main.require('./src/meta');
-const posts = require.main.require('./src/posts').async;
+const posts = require.main.require('./src/posts');
 const helpers = require.main.require('./src/controllers/helpers');
 
 const async = require('async');
@@ -104,6 +104,11 @@ plugin.append = async (data) => {
 	if (delta) {
 		data.body = delta;
 	}
+	return data;
+};
+
+plugin.handleRawPost = async (data) => {
+	data.content = await posts.getPostField(data.pid, 'quillDelta');
 	return data;
 };
 
