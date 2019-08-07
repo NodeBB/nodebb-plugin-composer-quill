@@ -8,6 +8,7 @@ const plugins = module.parent.exports;
 
 const db = require.main.require('./src/database');
 const meta = require.main.require('./src/meta');
+const posts = require.main.require('./src/posts');
 const helpers = require.main.require('./src/controllers/helpers');
 
 const async = require('async');
@@ -115,6 +116,14 @@ plugin.appendDelta = async (data) => {
 		return post;
 	});
 
+	return data;
+};
+
+plugin.append = async (data) => {
+	const delta = await posts.getPostField(data.pid, 'quillDelta');
+	if (delta) {
+		data.body = delta;
+	}
 	return data;
 };
 
