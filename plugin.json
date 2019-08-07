@@ -8,7 +8,6 @@
 		{ "hook": "filter:composer.build", "method": "build" },
 		{ "hook": "filter:post.create", "method": "savePost" },
 		{ "hook": "filter:post.edit", "method": "savePost" },
-		{ "hook": "filter:post.getFields", "method": "appendDelta" },
 		{ "hook": "filter:composer.push", "method": "append" },
 		{ "hook": "filter:messaging.save", "method": "saveChat" }
 	],
