@@ -8,7 +8,7 @@ $(document).ready(function () {
 		try {
 			var parsed = JSON.parse(delta);
 			parsed.ops = parsed.ops.map(function (op) {
-				op.attributes = Object.assign({ blockquote: true }, op.attributes || {});
+				op.attributes = { blockquote: true, ...op.attributes || {} };
 				return op;
 			});
 			return JSON.stringify(parsed);
