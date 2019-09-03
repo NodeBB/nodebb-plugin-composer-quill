@@ -94,6 +94,10 @@ plugin.savePost = (data, callback) => {
 };
 
 plugin.saveChat = (data, callback) => {
+	if (data.system) {
+		return setImmediate(callback, null, data);
+	}
+
 	data.quillDelta = data.content;
 	data.content = migrator.toHtml(data.content);
 	callback(null, data);
