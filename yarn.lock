@@ -2511,10 +2511,10 @@ quick-lru@^1.0.0:
   resolved "https://registry.yarnpkg.com/quick-lru/-/quick-lru-1.1.0.tgz#4360b17c61136ad38078397ff11416e186dcfbb8"
   integrity sha1-Q2CxfGETatOAeDl/8RQW4Ybc+7g=
 
-quill-delta-to-html@^0.10.0:
-  version "0.10.12"
-  resolved "https://registry.yarnpkg.com/quill-delta-to-html/-/quill-delta-to-html-0.10.12.tgz#70c6c3644f03233120e344c58e7d5dcc27c1178e"
-  integrity sha512-X/AypFZ/U6+xmzqpCLvGQAKmEjNDFjOT3BR3irbR40aeRIJc7EBWD0pGytvgeamlYWq2SQ4mQR6V1wMmVu7/7Q==
+quill-delta-to-html@^0.11.0:
+  version "0.11.0"
+  resolved "https://registry.yarnpkg.com/quill-delta-to-html/-/quill-delta-to-html-0.11.0.tgz#d980c287752fd641322ba8cbeb11ebd929d62ea7"
+  integrity sha512-PsW/VIuVDxa0xN/e+jglsSZy2eSUl/db3Lbvv3uC/syFi2ZIBL8zSsQfR7qrURrt4Aih36JZnw37CFxelIaX2Q==
 
 quill-delta@^3.6.2:
   version "3.6.3"
