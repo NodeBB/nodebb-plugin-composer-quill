@@ -126,7 +126,7 @@ define('quill-nbb', [
 
 		// Update textarea on text-change event. This allows compatibility with
 		// how NodeBB handles things like drafts, etc.
-		quill.on('text-change', function () {
+		quill.on('editor-change', function () {
 			if (isEmpty(quill)) {
 				quill.deleteText(0, quill.getLength());
 				textareaEl.val('');
