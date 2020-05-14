@@ -118,7 +118,7 @@ define('quill-nbb', [
 			// Move cursor to the very end
 			var length = quill.getLength();
 			quill.setSelection(length);
-		} else if (draft) {
+		} else if (draft && draft.text) {
 			// Set title
 			targetEl.parents('.composer').find('.title').val(draft.title);
 			const delta = JSON.parse(draft.text);
