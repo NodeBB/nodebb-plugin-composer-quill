@@ -13,8 +13,8 @@
 		{ "hook": "filter:post.getRawPost", "method": "handleRawPost" }
 	],
 	"css": [
-		"./node_modules/quill/dist/quill.snow.css",
-		"./node_modules/quill/dist/quill.bubble.css"
+		"../quill/dist/quill.snow.css",
+		"../quill/dist/quill.bubble.css"
 	],
 	"less": [
 		"../nodebb-plugin-composer-default/static/less/composer.less",
