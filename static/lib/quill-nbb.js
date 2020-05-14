@@ -9,8 +9,9 @@ define('quill-nbb', [
 	'composer/autocomplete',
 	'composer/resize',
 	'composer/formatting',
+	'composer/drafts',
 	'components',
-], function (Quill, Emoji, composer, autocomplete, resize, formatting, components) {
+], function (Quill, Emoji, composer, autocomplete, resize, formatting, drafts, components) {
 	var quillNbb = {
 		uploads: {},
 	};
@@ -90,7 +91,8 @@ define('quill-nbb', [
 		$(window).trigger('action:quill.load', quill);
 		$(window).off('action:quill.load');
 
-		// Restore text if contained in composerData
+		// Restore text if contained in composerData or drafts
+		const draft = drafts.get(data.composerData.save_id);
 		if (data.composerData && data.composerData.body) {
 			try {
 				var unescaped = data.composerData.body.replace(/&quot;/g, '"');
@@ -116,6 +118,18 @@ define('quill-nbb', [
 			// Move cursor to the very end
 			var length = quill.getLength();
 			quill.setSelection(length);
+		} else if (draft) {
+			// Set title
+			targetEl.parents('.composer').find('.title').val(draft.title);
+			const delta = JSON.parse(draft.text);
+			delta.ops.push({
+				insert: '\n',
+				attributes: {
+					direction: textDirection,
+					align: textDirection === 'rtl' ? 'right' : 'left',
+				},
+			});
+			quill.setContents(delta, 'api');
 		}
 
 		// Automatic RTL support
@@ -135,6 +149,7 @@ define('quill-nbb', [
 
 			textareaEl.val(JSON.stringify(quill.getContents()));
 			textareaEl.trigger('change');
+			textareaEl.trigger('keyup');
 		});
 
 		// Handle tab/enter for autocomplete
