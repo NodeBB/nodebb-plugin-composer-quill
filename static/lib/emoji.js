@@ -57,11 +57,12 @@ define('quill-emoji', ['quill'], function (quill) {
 					app.alertError(err.message);
 				}
 
-				Emoji.table = table;
+				if (table !== null) {
+					Emoji.table = table;
+					quill.on('text-change', Emoji.convert.bind(quill));
+				}
 			});
 		}
-
-		quill.on('text-change', Emoji.convert.bind(quill));
 	};
 
 	Emoji.convert = function (delta) {
