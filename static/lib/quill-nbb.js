@@ -37,8 +37,8 @@ define('quill-nbb', [
 		var toolbarHandlers = formatting.getDispatchTable();
 		var group = [];
 		data.formatting.forEach(function (option) {
-			group.push(option.name);
 			if (toolbarHandlers[option.name]) {
+				group.push(option.name);
 				toolbarOptions.handlers[option.name] = function () {
 					// Chicken-wrapper to pass additional values to handlers (to match composer-default behaviour)
 					var quill = targetEl.data('quill');

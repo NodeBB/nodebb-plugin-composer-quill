@@ -18,6 +18,7 @@
 	],
 	"less": [
 		"../nodebb-plugin-composer-default/static/less/composer.less",
+		"./static/less/post.less",
 		"./static/less/overrides.less"
 	],
 	"modules": {
