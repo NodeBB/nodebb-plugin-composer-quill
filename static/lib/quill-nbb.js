@@ -276,12 +276,11 @@ define('quill-nbb', [
 
 		data.files.forEach((file) => {
 			const alertId = utils.slugify([data.post_uuid, file.filename].join('-'));
-			console.log(file, alertId);
 			app.removeAlert(alertId);
 
 			// Image vs. file upload
 			if (file.isImage) {
-				quill.insertEmbed(quill.getSelection().index, 'image', window.location.origin + file.url);
+				quill.insertEmbed(quill.getSelection().index, 'image', file.url);
 			} else {
 				var selection = quill.getSelection();
 
