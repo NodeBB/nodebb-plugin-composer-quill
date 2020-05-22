@@ -30,9 +30,7 @@
 				<!-- ELSE -->
 				<span class="title form-control">[[topic:composer.replying_to, "{title}"]]</span>
 				<!-- ENDIF isTopicOrMain -->
-				<ul class="dropdown-menu quick-search-results hidden">
-					<!-- IMPORT partials/quick-search-results.tpl -->
-				</ul>
+				<ul class="dropdown-menu quick-search-results hidden"></ul>
 			</div>
 
 			<!-- IF isTopic -->
