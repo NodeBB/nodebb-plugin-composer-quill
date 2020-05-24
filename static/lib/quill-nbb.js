@@ -22,6 +22,7 @@ define('quill-nbb', [
 		var toolbarOptions = {
 			container: [
 				[{ header: [1, 2, 3, 4, 5, 6, false] }], // h1..h6
+				[{ font: [] }],
 				['bold', 'italic', 'underline', 'strike'], // toggled buttons
 				['link', 'blockquote', 'code-block'],
 				[{ list: 'ordered' }, { list: 'bullet' }],
