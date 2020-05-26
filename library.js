@@ -87,10 +87,17 @@ plugin.build = function (data, callback) {
 	callback(null, data);
 };
 
-plugin.savePost = (data, callback) => {
-	data.post.quillDelta = data.post.content;
-	data.post.content = migrator.toHtml(data.post.content);
-	callback(null, data);
+plugin.savePost = async (data) => {
+	if (migrator.isDelta(data.post.content)) {
+		// Optimistic case: regular post via quill composer
+		data.post.quillDelta = data.post.content;
+		data.post.content = migrator.toHtml(data.post.content);
+	} else {
+		// Fallback to handle write-api and such
+		data.post = migrator.toQuill(data.post);
+	}
+
+	return data;
 };
 
 plugin.saveChat = (data, callback) => {
