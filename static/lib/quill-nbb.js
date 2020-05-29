@@ -259,6 +259,7 @@ define('quill-nbb', [
 
 		if (!quillNbb.uploads[filename]) {
 			console.warn('[quill/uploads] Unable to find file (' + filename + ').');
+			app.removeAlert(alertId);
 			return;
 		}
 
