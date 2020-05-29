@@ -176,7 +176,14 @@ define('quill-nbb', [
 	}
 
 	function isEmpty(quill) {
-		return quill.getContents().ops[0].insert === '\n' && quill.getLength() < 2;
+		const contents = quill.getContents();
+
+		if (contents.ops.length === 1) {
+			const value = contents.ops[0].insert.replace(/[\s\n]/g, '');
+			return value === '';
+		}
+
+		return false;
 	}
 
 	$(window).on('action:composer.loaded', function (ev, data) {
@@ -211,6 +218,12 @@ define('quill-nbb', [
 
 		autocomplete.init(postContainer, data.post_uuid);
 		resize.reposition(postContainer);
+	});
+
+	$(window).on('action:composer.check', function (ev, data) {
+		// Update bodyLen for length checking purposes
+		var quill = components.get('composer').filter('[data-uuid="' + data.post_uuid + '"]').find('.ql-container').data('quill');
+		data.bodyLen = quill.getLength() - 1;
 	});
 
 	$(window).on('action:chat.loaded', function (evt, containerEl) {
@@ -304,7 +317,7 @@ define('quill-nbb', [
 	$(window).on('action:composer.uploadError', function (evt, data) {
 		var quill = components.get('composer').filter('[data-uuid="' + data.post_uuid + '"]').find('.ql-container').data('quill');
 		var textareaEl = components.get('composer').filter('[data-uuid="' + data.post_uuid + '"]').find('textarea');
-		textareaEl.val(JSON.stringify(quill.getContents()));
+		textareaEl.val(!isEmpty(quill) ? JSON.stringify(quill.getContents()) : '');
 		textareaEl.trigger('change');
 		textareaEl.trigger('keyup');
 	});
