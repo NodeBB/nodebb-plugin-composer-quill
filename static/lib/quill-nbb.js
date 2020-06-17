@@ -93,7 +93,7 @@ define('quill-nbb', [
 		$(window).off('action:quill.load');
 
 		// Restore text if contained in composerData or drafts
-		const draft = drafts.get(data.composerData.save_id);
+		const draft = data.composerData && drafts.get(data.composerData.save_id);
 		if (data.composerData && data.composerData.body) {
 			try {
 				var unescaped = data.composerData.body.replace(/&quot;/g, '"');
