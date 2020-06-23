@@ -1,6 +1,6 @@
 'use strict';
 
-/* globals $, window, define, socket, app, ajaxify, utils, config */
+/* globals document, $, window, define, socket, app, ajaxify, utils, config */
 
 define('quill-nbb', [
 	'quill',
@@ -64,6 +64,7 @@ define('quill-nbb', [
 			modules: {
 				toolbar: toolbarOptions,
 			},
+			bounds: data.bounds || document.body,
 		});
 		targetEl.data('quill', quill);
 		targetEl.find('.ql-editor').addClass('write');
@@ -239,6 +240,7 @@ define('quill-nbb', [
 			init(targetEl, {
 				formatting: composer.formatting,
 				theme: 'bubble',
+				bounds: containerEl,
 			}, onInit);
 		} else {
 			socket.emit('plugins.composer.getFormattingOptions', function (err, options) {
