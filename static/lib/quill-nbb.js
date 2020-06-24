@@ -91,7 +91,6 @@ define('quill-nbb', [
 		});
 
 		$(window).trigger('action:quill.load', quill);
-		$(window).off('action:quill.load');
 
 		// Restore text if contained in composerData or drafts
 		const draft = data.composerData && drafts.get(data.composerData.save_id);
