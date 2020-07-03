@@ -50,7 +50,7 @@
   "devDependencies": {
     "@commitlint/cli": "9.0.1",
     "@commitlint/config-angular": "9.0.1",
-    "eslint": "7.3.0",
+    "eslint": "7.4.0",
     "eslint-config-airbnb-base": "14.2.0",
     "eslint-plugin-import": "2.20.1",
     "husky": "4.2.5",
