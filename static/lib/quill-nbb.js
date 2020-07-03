@@ -11,6 +11,9 @@ define('quill-nbb', [
 	'composer/formatting',
 	'composer/drafts',
 	'components',
+
+	// Dependencies listed after this line are not used in-file
+	'quill-controls',
 ], function (Quill, Emoji, composer, autocomplete, resize, formatting, drafts, components) {
 	var quillNbb = {
 		uploads: {},
@@ -38,15 +41,13 @@ define('quill-nbb', [
 		var toolbarHandlers = formatting.getDispatchTable();
 		var group = [];
 		data.formatting.forEach(function (option) {
-			if (toolbarHandlers[option.name]) {
-				group.push(option.name);
-				toolbarOptions.handlers[option.name] = function () {
-					// Chicken-wrapper to pass additional values to handlers (to match composer-default behaviour)
-					var quill = targetEl.data('quill');
-					var selection = quill.getSelection(true);
-					toolbarHandlers[option.name].apply(quill, [textareaEl, selection.index, selection.index + selection.length]);
-				};
-			}
+			group.push(option.name);
+			toolbarOptions.handlers[option.name] = function () {
+				// Chicken-wrapper to pass additional values to handlers (to match composer-default behaviour)
+				var quill = targetEl.data('quill');
+				var selection = quill.getSelection(true);
+				toolbarHandlers[option.name].apply(quill, [textareaEl, selection.index, selection.index + selection.length]);
+			};
 		});
 		// -- upload privileges
 		['upload:post:file', 'upload:post:image'].forEach(function (privilege) {
@@ -334,14 +335,44 @@ define('quill-nbb', [
 	});
 
 	$(window).on('action:composer.insertIntoTextarea', function (evt, data) {
-		var selection = data.context.getSelection(true);
-		data.context.insertText(selection.index, data.value);
+		const quill = $(data.textarea).siblings('.ql-container').data('quill');
+		var selection = quill.getSelection(true);
+		quill.insertText(selection.index, data.value);
 		data.preventDefault = true;
 	});
 
 	$(window).on('action:composer.updateTextareaSelection', function (evt, data) {
-		data.context.setSelection(data.start, data.end - data.start);
+		const quill = $(data.textarea).siblings('.ql-container').data('quill');
+		quill.setSelection(data.start, data.end - data.start);
 		data.preventDefault = true;
+	});
+
+	$(window).on('action:composer.wrapSelectionInTextareaWith', function (evt, data) {
+		const Delta = Quill.import('delta');
+		const quill = $(data.textarea).siblings('.ql-container').data('quill');
+
+		var range = quill.getSelection();
+		var insertionDelta;
+
+		if (range.length) {
+			insertionDelta = quill.getContents(range.index, range.length);
+		} else {
+			insertionDelta = new Delta();
+		}
+
+		// Wrap selection in spoiler tags
+		quill.updateContents(new Delta()
+			.retain(range.index)
+			.delete(range.length)
+			.insert(data.leading)
+			.concat(insertionDelta)
+			.insert(data.trailing)
+		);
+
+		if (range.length) {
+			// Update selection
+			quill.setSelection(range.index + (data.leading.length), range.length);
+		}
 	});
 
 	$(window).on('action:chat.updateRemainingLength', function (evt, data) {
