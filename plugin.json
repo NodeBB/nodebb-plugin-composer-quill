@@ -10,7 +10,9 @@
 		{ "hook": "filter:post.edit", "method": "savePost" },
 		{ "hook": "filter:composer.push", "method": "append" },
 		{ "hook": "filter:messaging.save", "method": "saveChat" },
-		{ "hook": "filter:post.getRawPost", "method": "handleRawPost" }
+		{ "hook": "filter:messaging.edit", "method": "saveChat" },
+		{ "hook": "filter:post.getRawPost", "method": "handleRawPost" },
+		{ "hook": "filter:messaging.getFields", "method": "handleMessageEdit" }
 	],
 	"css": [
 		"../quill/dist/quill.snow.css",

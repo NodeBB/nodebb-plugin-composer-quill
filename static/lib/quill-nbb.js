@@ -252,6 +252,7 @@ define('quill-nbb', [
 				init(targetEl, {
 					formatting: composer.formatting,
 					theme: 'bubble',
+					bounds: containerEl,
 				}, onInit);
 			});
 		}
@@ -266,6 +267,18 @@ define('quill-nbb', [
 		var textDirection = $('html').attr('data-dir');
 		quill.format('direction', textDirection);
 		quill.format('align', textDirection === 'rtl' ? 'right' : 'left');
+	});
+
+	$(window).on('action:chat.prepEdit', function (evt, data) {
+		let value = data.inputEl.val();
+		const quill = data.inputEl.siblings('.ql-container').data('quill');
+
+		try {
+			value = JSON.parse(value);
+			quill.setContents(value, 'user');
+		} catch (e) {
+			app.alertError('[[error:invalid-json]]');
+		}
 	});
 
 	$(window).on('action:composer.uploadUpdate', function (evt, data) {

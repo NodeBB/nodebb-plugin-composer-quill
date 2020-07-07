@@ -7,6 +7,7 @@ const defaultComposer = require.main.require('nodebb-plugin-composer-default');
 const plugins = module.parent.exports;
 const meta = require.main.require('./src/meta');
 const posts = require.main.require('./src/posts');
+const messaging = require.main.require('./src/messaging');
 const helpers = require.main.require('./src/controllers/helpers');
 
 const async = require('async');
@@ -120,6 +121,17 @@ plugin.append = async (data) => {
 
 plugin.handleRawPost = async (data) => {
 	data.content = await posts.getPostField(data.pid, 'quillDelta');
+	return data;
+};
+
+plugin.handleMessageEdit = async (data) => {
+	// Only handle situations where message content is requested
+	if (data.fields.length > 1 || data.fields[0] !== 'content') {
+		return data;
+	}
+
+	const delta = await messaging.getMessageField(data.mid, 'quillDelta');
+	data.message.content = delta;
 	return data;
 };
 
