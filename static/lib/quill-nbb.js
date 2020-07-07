@@ -4,22 +4,237 @@
 
 define('quill-nbb', [
 	'quill',
-	'quill-emoji',
-	'composer',
 	'composer/autocomplete',
 	'composer/resize',
-	'composer/formatting',
-	'composer/drafts',
 	'components',
-
-	// Dependencies listed after this line are not used in-file
-	'quill-controls',
-], function (Quill, Emoji, composer, autocomplete, resize, formatting, drafts, components) {
+], function (Quill, autocomplete, resize, components) {
 	var quillNbb = {
 		uploads: {},
 	};
 
-	function init(targetEl, data, callback) {
+	$(window).on('action:composer.loaded', function (ev, data) {
+		var postContainer = $('.composer[data-uuid="' + data.post_uuid + '"]');
+		var targetEl = postContainer.find('.write-container div');
+
+		init(targetEl, data);
+
+		var cidEl = postContainer.find('.category-list');
+		if (cidEl.length) {
+			cidEl.attr('id', 'cmp-cid-' + data.post_uuid);
+		} else {
+			postContainer.append('<input id="cmp-cid-' + data.post_uuid + '" type="hidden" value="' + ajaxify.data.cid + '"/>');
+		}
+
+		// if (config.allowTopicsThumbnail && data.composerData.isMain) {
+		//   var thumbToggleBtnEl = postContainer.find('.re-topic_thumb');
+		//   var url = data.composerData.topic_thumb || '';
+
+		//   postContainer.find('input#topic-thumb-url').val(url);
+		//   postContainer.find('img.topic-thumb-preview').attr('src', url);
+
+		//   if (url) {
+		//     postContainer.find('.topic-thumb-clear-btn').removeClass('hide');
+		//   }
+		//   thumbToggleBtnEl.addClass('show');
+		//   thumbToggleBtnEl.off('click').on('click', function() {
+		//     var container = postContainer.find('.topic-thumb-container');
+		//     container.toggleClass('hide', !container.hasClass('hide'));
+		//   });
+		// }
+
+		autocomplete.init(postContainer, data.post_uuid);
+		resize.reposition(postContainer);
+	});
+
+	$(window).on('action:composer.check', function (ev, data) {
+		// Update bodyLen for length checking purposes
+		var quill = components.get('composer').filter('[data-uuid="' + data.post_uuid + '"]').find('.ql-container').data('quill');
+		data.bodyLen = quill.getLength() - 1;
+	});
+
+	$(window).on('action:chat.sent', function (evt, data) {
+		// Empty chat input
+		var quill = $('.chat-modal[data-roomid="' + data.roomId + '"] .ql-container, .expanded-chat[data-roomid="' + data.roomId + '"] .ql-container').data('quill');
+		quill.deleteText(0, quill.getLength());
+
+		// Reset text direction
+		var textDirection = $('html').attr('data-dir');
+		quill.format('direction', textDirection);
+		quill.format('align', textDirection === 'rtl' ? 'right' : 'left');
+	});
+
+	$(window).on('action:chat.prepEdit', function (evt, data) {
+		let value = data.inputEl.val();
+		const quill = data.inputEl.siblings('.ql-container').data('quill');
+
+		try {
+			value = JSON.parse(value);
+			quill.setContents(value, 'user');
+		} catch (e) {
+			app.alertError('[[error:invalid-json]]');
+		}
+	});
+
+	$(window).on('action:composer.uploadUpdate', function (evt, data) {
+		var filename = data.filename.replace(/^\d+_\d+_/, '');
+		var alertId = utils.slugify([data.post_uuid, filename].join('-'));
+
+		if (!quillNbb.uploads[filename]) {
+			console.warn('[quill/uploads] Unable to find file (' + filename + ').');
+			app.removeAlert(alertId);
+			return;
+		}
+
+		if (!data.text.startsWith('/')) {
+			app.alert({
+				alert_id: alertId,
+				title: data.filename.replace(/\d_\d+_/, ''),
+				message: data.text,
+				timeout: 1000,
+			});
+		}
+	});
+
+	$(window).on('action:composer.upload', function (evt, data) {
+		var quill = components.get('composer').filter('[data-uuid="' + data.post_uuid + '"]').find('.ql-container').data('quill');
+
+		data.files.forEach((file) => {
+			const alertId = utils.slugify([data.post_uuid, file.filename].join('-'));
+			app.removeAlert(alertId);
+
+			// Image vs. file upload
+			if (file.isImage) {
+				quill.insertEmbed(quill.getSelection().index, 'image', file.url);
+			} else {
+				var selection = quill.getSelection();
+
+				if (selection.length) {
+					var linkText = quill.getText(selection.index, selection.length);
+					quill.deleteText(selection.index, selection.length);
+					quill.insertText(selection.index, linkText, {
+						link: file.url,
+					});
+				} else {
+					quill.insertText(selection.index, file.filename, {
+						link: file.url,
+					});
+				}
+			}
+		});
+	});
+
+	$(window).on('action:composer.uploadError', function (evt, data) {
+		var quill = components.get('composer').filter('[data-uuid="' + data.post_uuid + '"]').find('.ql-container').data('quill');
+		var textareaEl = components.get('composer').filter('[data-uuid="' + data.post_uuid + '"]').find('textarea');
+		textareaEl.val(!isEmpty(quill) ? JSON.stringify(quill.getContents()) : '');
+		textareaEl.trigger('change');
+		textareaEl.trigger('keyup');
+	});
+
+	$(window).on('action:composer.uploadStart', function (evt, data) {
+		data.files.forEach(function (file) {
+			app.alert({
+				alert_id: utils.slugify([data.post_uuid, file.filename].join('-')),
+				title: file.filename.replace(/\d_\d+_/, ''),
+				message: data.text,
+			});
+		});
+	});
+
+	$(window).on('action:composer.insertIntoTextarea', function (evt, data) {
+		const quill = $(data.textarea).siblings('.ql-container').data('quill');
+		var selection = quill.getSelection(true);
+		quill.insertText(selection.index, data.value);
+		data.preventDefault = true;
+	});
+
+	$(window).on('action:composer.updateTextareaSelection', function (evt, data) {
+		const quill = $(data.textarea).siblings('.ql-container').data('quill');
+		quill.setSelection(data.start, data.end - data.start);
+		data.preventDefault = true;
+	});
+
+	$(window).on('action:composer.wrapSelectionInTextareaWith', function (evt, data) {
+		const Delta = Quill.import('delta');
+		const quill = $(data.textarea).siblings('.ql-container').data('quill');
+
+		var range = quill.getSelection();
+		var insertionDelta;
+
+		if (range.length) {
+			insertionDelta = quill.getContents(range.index, range.length);
+		} else {
+			insertionDelta = new Delta();
+		}
+
+		// Wrap selection in spoiler tags
+		quill.updateContents(new Delta()
+			.retain(range.index)
+			.delete(range.length)
+			.insert(data.leading)
+			.concat(insertionDelta)
+			.insert(data.trailing)
+		);
+
+		if (range.length) {
+			// Update selection
+			quill.setSelection(range.index + (data.leading.length), range.length);
+		}
+	});
+
+	$(window).on('action:chat.updateRemainingLength', function (evt, data) {
+		var quill = data.parent.find('.ql-container').data('quill');
+		var length = quill.getText().length;
+		data.parent.find('[component="chat/message/length"]').text(length);
+		data.parent.find('[component="chat/message/remaining"]').text(config.maximumChatMessageLength - length);
+	});
+});
+
+// Window events that must be attached immediately
+
+$(window).on('action:chat.loaded', function (evt, containerEl) {
+	require([
+		'composer',
+		'composer/autocomplete',
+		'components',
+	], function (composer, autocomplete, components) {
+		// Create div element for composer
+		var targetEl = $('<div></div>').insertBefore(components.get('chat/input'));
+
+		var onInit = function () {
+			autocomplete.init($(containerEl));
+		};
+
+		// Load formatting options into DOM on-demand
+		if (composer.formatting) {
+			init(targetEl, {
+				formatting: composer.formatting,
+				theme: 'bubble',
+				bounds: containerEl,
+			}, onInit);
+		} else {
+			socket.emit('plugins.composer.getFormattingOptions', function (err, options) {
+				if (err) {
+					app.alertError(err.message);
+				}
+
+				composer.formatting = options;
+				init(targetEl, {
+					formatting: composer.formatting,
+					theme: 'bubble',
+					bounds: containerEl,
+				}, onInit);
+			});
+		}
+	});
+});
+
+// Internal methods
+
+function init(targetEl, data, callback) {
+	console.log('init successfully called');
+	require(['quill', 'quill-emoji', 'composer/formatting', 'composer/drafts'], function (Quill, Emoji, formatting, drafts) {
+		console.log('deps loaded');
 		var textDirection = $('html').attr('data-dir');
 		var textareaEl = targetEl.siblings('textarea');
 		var toolbarOptions = {
@@ -174,224 +389,16 @@ define('quill-nbb', [
 		if (typeof callback === 'function') {
 			callback();
 		}
+	});
+}
+
+function isEmpty(quill) {
+	const contents = quill.getContents();
+
+	if (contents.ops.length === 1) {
+		const value = contents.ops[0].insert.replace(/[\s\n]/g, '');
+		return value === '';
 	}
 
-	function isEmpty(quill) {
-		const contents = quill.getContents();
-
-		if (contents.ops.length === 1) {
-			const value = contents.ops[0].insert.replace(/[\s\n]/g, '');
-			return value === '';
-		}
-
-		return false;
-	}
-
-	$(window).on('action:composer.loaded', function (ev, data) {
-		var postContainer = $('.composer[data-uuid="' + data.post_uuid + '"]');
-		var targetEl = postContainer.find('.write-container div');
-
-		init(targetEl, data);
-
-		var cidEl = postContainer.find('.category-list');
-		if (cidEl.length) {
-			cidEl.attr('id', 'cmp-cid-' + data.post_uuid);
-		} else {
-			postContainer.append('<input id="cmp-cid-' + data.post_uuid + '" type="hidden" value="' + ajaxify.data.cid + '"/>');
-		}
-
-		// if (config.allowTopicsThumbnail && data.composerData.isMain) {
-		//   var thumbToggleBtnEl = postContainer.find('.re-topic_thumb');
-		//   var url = data.composerData.topic_thumb || '';
-
-		//   postContainer.find('input#topic-thumb-url').val(url);
-		//   postContainer.find('img.topic-thumb-preview').attr('src', url);
-
-		//   if (url) {
-		//     postContainer.find('.topic-thumb-clear-btn').removeClass('hide');
-		//   }
-		//   thumbToggleBtnEl.addClass('show');
-		//   thumbToggleBtnEl.off('click').on('click', function() {
-		//     var container = postContainer.find('.topic-thumb-container');
-		//     container.toggleClass('hide', !container.hasClass('hide'));
-		//   });
-		// }
-
-		autocomplete.init(postContainer, data.post_uuid);
-		resize.reposition(postContainer);
-	});
-
-	$(window).on('action:composer.check', function (ev, data) {
-		// Update bodyLen for length checking purposes
-		var quill = components.get('composer').filter('[data-uuid="' + data.post_uuid + '"]').find('.ql-container').data('quill');
-		data.bodyLen = quill.getLength() - 1;
-	});
-
-	$(window).on('action:chat.loaded', function (evt, containerEl) {
-		// Create div element for composer
-		var targetEl = $('<div></div>').insertBefore(components.get('chat/input'));
-
-		var onInit = function () {
-			autocomplete.init($(containerEl));
-		};
-
-		// Load formatting options into DOM on-demand
-		if (composer.formatting) {
-			init(targetEl, {
-				formatting: composer.formatting,
-				theme: 'bubble',
-				bounds: containerEl,
-			}, onInit);
-		} else {
-			socket.emit('plugins.composer.getFormattingOptions', function (err, options) {
-				if (err) {
-					app.alertError(err.message);
-				}
-
-				composer.formatting = options;
-				init(targetEl, {
-					formatting: composer.formatting,
-					theme: 'bubble',
-					bounds: containerEl,
-				}, onInit);
-			});
-		}
-	});
-
-	$(window).on('action:chat.sent', function (evt, data) {
-		// Empty chat input
-		var quill = $('.chat-modal[data-roomid="' + data.roomId + '"] .ql-container, .expanded-chat[data-roomid="' + data.roomId + '"] .ql-container').data('quill');
-		quill.deleteText(0, quill.getLength());
-
-		// Reset text direction
-		var textDirection = $('html').attr('data-dir');
-		quill.format('direction', textDirection);
-		quill.format('align', textDirection === 'rtl' ? 'right' : 'left');
-	});
-
-	$(window).on('action:chat.prepEdit', function (evt, data) {
-		let value = data.inputEl.val();
-		const quill = data.inputEl.siblings('.ql-container').data('quill');
-
-		try {
-			value = JSON.parse(value);
-			quill.setContents(value, 'user');
-		} catch (e) {
-			app.alertError('[[error:invalid-json]]');
-		}
-	});
-
-	$(window).on('action:composer.uploadUpdate', function (evt, data) {
-		var filename = data.filename.replace(/^\d+_\d+_/, '');
-		var alertId = utils.slugify([data.post_uuid, filename].join('-'));
-
-		if (!quillNbb.uploads[filename]) {
-			console.warn('[quill/uploads] Unable to find file (' + filename + ').');
-			app.removeAlert(alertId);
-			return;
-		}
-
-		if (!data.text.startsWith('/')) {
-			app.alert({
-				alert_id: alertId,
-				title: data.filename.replace(/\d_\d+_/, ''),
-				message: data.text,
-				timeout: 1000,
-			});
-		}
-	});
-
-	$(window).on('action:composer.upload', function (evt, data) {
-		var quill = components.get('composer').filter('[data-uuid="' + data.post_uuid + '"]').find('.ql-container').data('quill');
-
-		data.files.forEach((file) => {
-			const alertId = utils.slugify([data.post_uuid, file.filename].join('-'));
-			app.removeAlert(alertId);
-
-			// Image vs. file upload
-			if (file.isImage) {
-				quill.insertEmbed(quill.getSelection().index, 'image', file.url);
-			} else {
-				var selection = quill.getSelection();
-
-				if (selection.length) {
-					var linkText = quill.getText(selection.index, selection.length);
-					quill.deleteText(selection.index, selection.length);
-					quill.insertText(selection.index, linkText, {
-						link: file.url,
-					});
-				} else {
-					quill.insertText(selection.index, file.filename, {
-						link: file.url,
-					});
-				}
-			}
-		});
-	});
-
-	$(window).on('action:composer.uploadError', function (evt, data) {
-		var quill = components.get('composer').filter('[data-uuid="' + data.post_uuid + '"]').find('.ql-container').data('quill');
-		var textareaEl = components.get('composer').filter('[data-uuid="' + data.post_uuid + '"]').find('textarea');
-		textareaEl.val(!isEmpty(quill) ? JSON.stringify(quill.getContents()) : '');
-		textareaEl.trigger('change');
-		textareaEl.trigger('keyup');
-	});
-
-	$(window).on('action:composer.uploadStart', function (evt, data) {
-		data.files.forEach(function (file) {
-			app.alert({
-				alert_id: utils.slugify([data.post_uuid, file.filename].join('-')),
-				title: file.filename.replace(/\d_\d+_/, ''),
-				message: data.text,
-			});
-		});
-	});
-
-	$(window).on('action:composer.insertIntoTextarea', function (evt, data) {
-		const quill = $(data.textarea).siblings('.ql-container').data('quill');
-		var selection = quill.getSelection(true);
-		quill.insertText(selection.index, data.value);
-		data.preventDefault = true;
-	});
-
-	$(window).on('action:composer.updateTextareaSelection', function (evt, data) {
-		const quill = $(data.textarea).siblings('.ql-container').data('quill');
-		quill.setSelection(data.start, data.end - data.start);
-		data.preventDefault = true;
-	});
-
-	$(window).on('action:composer.wrapSelectionInTextareaWith', function (evt, data) {
-		const Delta = Quill.import('delta');
-		const quill = $(data.textarea).siblings('.ql-container').data('quill');
-
-		var range = quill.getSelection();
-		var insertionDelta;
-
-		if (range.length) {
-			insertionDelta = quill.getContents(range.index, range.length);
-		} else {
-			insertionDelta = new Delta();
-		}
-
-		// Wrap selection in spoiler tags
-		quill.updateContents(new Delta()
-			.retain(range.index)
-			.delete(range.length)
-			.insert(data.leading)
-			.concat(insertionDelta)
-			.insert(data.trailing)
-		);
-
-		if (range.length) {
-			// Update selection
-			quill.setSelection(range.index + (data.leading.length), range.length);
-		}
-	});
-
-	$(window).on('action:chat.updateRemainingLength', function (evt, data) {
-		var quill = data.parent.find('.ql-container').data('quill');
-		var length = quill.getText().length;
-		data.parent.find('[component="chat/message/length"]').text(length);
-		data.parent.find('[component="chat/message/remaining"]').text(config.maximumChatMessageLength - length);
-	});
-});
+	return false;
+}
