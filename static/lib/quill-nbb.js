@@ -232,9 +232,7 @@ $(window).on('action:chat.loaded', function (evt, containerEl) {
 // Internal methods
 
 function init(targetEl, data, callback) {
-	console.log('init successfully called');
 	require(['quill', 'quill-emoji', 'composer/formatting', 'composer/drafts'], function (Quill, Emoji, formatting, drafts) {
-		console.log('deps loaded');
 		var textDirection = $('html').attr('data-dir');
 		var textareaEl = targetEl.siblings('textarea');
 		var toolbarOptions = {
