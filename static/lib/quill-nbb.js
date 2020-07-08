@@ -180,6 +180,8 @@ define('quill-nbb', [
 			// Update selection
 			quill.setSelection(range.index + (data.leading.length), range.length);
 		}
+
+		data.preventDefault = true;
 	});
 
 	$(window).on('action:chat.updateRemainingLength', function (evt, data) {
