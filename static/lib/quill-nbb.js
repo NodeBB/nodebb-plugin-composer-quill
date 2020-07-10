@@ -234,7 +234,7 @@ $(window).on('action:chat.loaded', function (evt, containerEl) {
 // Internal methods
 
 window.quill.init = function (targetEl, data, callback) {
-	require(['quill', 'quill-emoji', 'composer/formatting', 'composer/drafts'], function (Quill, Emoji, formatting, drafts) {
+	require(['quill', 'quill-magic-url', 'quill-emoji', 'composer/formatting', 'composer/drafts'], function (Quill, MagicUrl, Emoji, formatting, drafts) {
 		var textDirection = $('html').attr('data-dir');
 		var textareaEl = targetEl.siblings('textarea');
 		var toolbarOptions = {
@@ -275,10 +275,12 @@ window.quill.init = function (targetEl, data, callback) {
 		toolbarOptions.container.push(group);
 
 		// Quill...
+		Quill.register('modules/magicUrl', MagicUrl.default);
 		var quill = new Quill(targetEl.get(0), {
 			theme: data.theme || 'snow',
 			modules: {
 				toolbar: toolbarOptions,
+				magicUrl: true,
 			},
 			bounds: data.bounds || document.body,
 		});
