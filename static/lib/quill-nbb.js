@@ -2,21 +2,21 @@
 
 /* globals document, $, window, define, socket, app, ajaxify, utils, config */
 
+window.quill = {
+	uploads: {},
+};
+
 define('quill-nbb', [
 	'quill',
 	'composer/autocomplete',
 	'composer/resize',
 	'components',
 ], function (Quill, autocomplete, resize, components) {
-	var quillNbb = {
-		uploads: {},
-	};
-
 	$(window).on('action:composer.loaded', function (ev, data) {
 		var postContainer = $('.composer[data-uuid="' + data.post_uuid + '"]');
 		var targetEl = postContainer.find('.write-container div');
 
-		init(targetEl, data);
+		window.quill.init(targetEl, data);
 
 		var cidEl = postContainer.find('.category-list');
 		if (cidEl.length) {
@@ -79,7 +79,7 @@ define('quill-nbb', [
 		var filename = data.filename.replace(/^\d+_\d+_/, '');
 		var alertId = utils.slugify([data.post_uuid, filename].join('-'));
 
-		if (!quillNbb.uploads[filename]) {
+		if (!window.quill.uploads[filename]) {
 			console.warn('[quill/uploads] Unable to find file (' + filename + ').');
 			app.removeAlert(alertId);
 			return;
@@ -126,7 +126,7 @@ define('quill-nbb', [
 	$(window).on('action:composer.uploadError', function (evt, data) {
 		var quill = components.get('composer').filter('[data-uuid="' + data.post_uuid + '"]').find('.ql-container').data('quill');
 		var textareaEl = components.get('composer').filter('[data-uuid="' + data.post_uuid + '"]').find('textarea');
-		textareaEl.val(!isEmpty(quill) ? JSON.stringify(quill.getContents()) : '');
+		textareaEl.val(!window.quill.isEmpty(quill) ? JSON.stringify(quill.getContents()) : '');
 		textareaEl.trigger('change');
 		textareaEl.trigger('keyup');
 	});
@@ -209,7 +209,7 @@ $(window).on('action:chat.loaded', function (evt, containerEl) {
 
 		// Load formatting options into DOM on-demand
 		if (composer.formatting) {
-			init(targetEl, {
+			window.quill.init(targetEl, {
 				formatting: composer.formatting,
 				theme: 'bubble',
 				bounds: containerEl,
@@ -221,7 +221,7 @@ $(window).on('action:chat.loaded', function (evt, containerEl) {
 				}
 
 				composer.formatting = options;
-				init(targetEl, {
+				window.quill.init(targetEl, {
 					formatting: composer.formatting,
 					theme: 'bubble',
 					bounds: containerEl,
@@ -233,7 +233,7 @@ $(window).on('action:chat.loaded', function (evt, containerEl) {
 
 // Internal methods
 
-function init(targetEl, data, callback) {
+window.quill.init = function (targetEl, data, callback) {
 	require(['quill', 'quill-emoji', 'composer/formatting', 'composer/drafts'], function (Quill, Emoji, formatting, drafts) {
 		var textDirection = $('html').attr('data-dir');
 		var textareaEl = targetEl.siblings('textarea');
@@ -355,18 +355,20 @@ function init(targetEl, data, callback) {
 
 		Emoji.enable(quill);
 
-		// Update textarea on text-change event. This allows compatibility with
+		// Update textarea on editor-change event. This allows compatibility with
 		// how NodeBB handles things like drafts, etc.
 		quill.on('editor-change', function () {
-			if (isEmpty(quill)) {
-				quill.deleteText(0, quill.getLength());
-				textareaEl.val('');
-				return;
-			}
-
 			textareaEl.val(JSON.stringify(quill.getContents()));
 			textareaEl.trigger('change');
 			textareaEl.trigger('keyup');
+		});
+
+		// Special handling on text-change
+		quill.on('text-change', function () {
+			if (window.quill.isEmpty(quill)) {
+				quill.deleteText(0, quill.getLength());
+				textareaEl.val('');
+			}
 		});
 
 		// Handle tab/enter for autocomplete
@@ -390,9 +392,11 @@ function init(targetEl, data, callback) {
 			callback();
 		}
 	});
-}
 
-function isEmpty(quill) {
+	return window.quill;
+};
+
+window.quill.isEmpty = function (quill) {
 	const contents = quill.getContents();
 
 	if (contents.ops.length === 1) {
@@ -401,4 +405,4 @@ function isEmpty(quill) {
 	}
 
 	return false;
-}
+};
