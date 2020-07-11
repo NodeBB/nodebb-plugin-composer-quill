@@ -8,10 +8,9 @@ window.quill = {
 
 define('quill-nbb', [
 	'quill',
-	'composer/autocomplete',
 	'composer/resize',
 	'components',
-], function (Quill, autocomplete, resize, components) {
+], function (Quill, resize, components) {
 	$(window).on('action:composer.loaded', function (ev, data) {
 		var postContainer = $('.composer[data-uuid="' + data.post_uuid + '"]');
 		var targetEl = postContainer.find('.write-container div');
@@ -42,7 +41,6 @@ define('quill-nbb', [
 		//   });
 		// }
 
-		autocomplete.init(postContainer, data.post_uuid);
 		resize.reposition(postContainer);
 	});
 
@@ -234,7 +232,10 @@ $(window).on('action:chat.loaded', function (evt, containerEl) {
 // Internal methods
 
 window.quill.init = function (targetEl, data, callback) {
-	require(['quill', 'quill-magic-url', 'quill-emoji', 'composer/formatting', 'composer/drafts'], function (Quill, MagicUrl, Emoji, formatting, drafts) {
+	require([
+		'quill', 'quill-magic-url', 'quill-emoji',
+		'composer/autocomplete', 'composer/formatting', 'composer/drafts',
+	], function (Quill, MagicUrl, Emoji, autocomplete, formatting, drafts) {
 		var textDirection = $('html').attr('data-dir');
 		var textareaEl = targetEl.siblings('textarea');
 		var toolbarOptions = {
@@ -355,6 +356,7 @@ window.quill.init = function (targetEl, data, callback) {
 		quill.format('direction', textDirection);
 		quill.format('align', textDirection === 'rtl' ? 'right' : 'left');
 
+		autocomplete.init(targetEl, data.post_uuid);
 		Emoji.enable(quill);
 
 		// Update textarea on editor-change event. This allows compatibility with
