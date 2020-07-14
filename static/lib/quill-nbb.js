@@ -356,6 +356,7 @@ window.quill.init = function (targetEl, data, callback) {
 		quill.format('direction', textDirection);
 		quill.format('align', textDirection === 'rtl' ? 'right' : 'left');
 
+		console.log('autocomplete.init called with', targetEl, data.post_uuid);
 		autocomplete.init(targetEl, data.post_uuid);
 		Emoji.enable(quill);
 
