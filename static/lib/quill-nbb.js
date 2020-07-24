@@ -281,7 +281,11 @@ window.quill.init = function (targetEl, data, callback) {
 			theme: data.theme || 'snow',
 			modules: {
 				toolbar: toolbarOptions,
-				magicUrl: true,
+				magicUrl: {
+					normalizeUrlOptions: {
+						sortQueryParameters: false,
+					},
+				},
 			},
 			bounds: data.bounds || document.body,
 		});
