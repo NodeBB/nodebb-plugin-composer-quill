@@ -19,21 +19,6 @@ Your posts should automatically work with Quill. Redactor saves HTML into the da
 ## Contributors Welcome
 This plugin is in its early stages. If you'd like to look at the [documentation](https://quilljs.com/docs/) and add a feature, or take a look at the GitHub Issues and do something from there then please do. All pull requests lovingly reviewed.
 
-## Development Notes
-
-### When this plugin is linked...
-
-If you use (npm|yarn) link to connect this plugin to your local development environment, you may run into an issue with CSS being missing because NodeBB cannot find the stylesheet.
-
-The reason is because when checked out from the repository, the subdependency `quill` is installed in `node_modules/` inside your folder. Whereas when installed via the forum, `quill` is put side-by-side with `nodebb-plugin-composer-quill` and thus the location of the CSS file is different.
-
-To resolve this, run the following commands:
-
-```
-cd /path/to/nodebb/node_modules
-ln -s /path/to/quill/node_modules/quill ./quill
-```
-
 ## Screenshots
 
 ### Desktop

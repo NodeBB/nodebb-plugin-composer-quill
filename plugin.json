@@ -14,12 +14,9 @@
 		{ "hook": "filter:post.getRawPost", "method": "handleRawPost" },
 		{ "hook": "filter:messaging.getFields", "method": "handleMessageEdit" }
 	],
-	"css": [
-		"../quill/dist/quill.snow.css",
-		"../quill/dist/quill.bubble.css"
-	],
 	"less": [
 		"../nodebb-plugin-composer-default/static/less/composer.less",
+		"./static/less/quill.less",
 		"./static/less/post.less",
 		"./static/less/overrides.less"
 	],
