@@ -71,7 +71,7 @@ define('quill-emoji', ['quill'], function (quill) {
 		var emojiRegex = /:([\w+-]+):/g;
 
 		// Special handling for emoji plugin
-		if (!delta || delta.ops.some(command => command.insert && (command.insert === ':' || String(command.insert).endsWith(':')))) {
+		if (!delta || delta.ops.some(command => command.insert && (command.insert === ':' || String(command.insert).endsWith(':') || String(command.insert).endsWith(': \n')))) {
 			// Check all nodes for emoji shorthand and replace with image
 			contents.reduce(function (retain, cur) {
 				var match = emojiRegex.exec(cur.insert);

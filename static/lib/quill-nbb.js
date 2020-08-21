@@ -144,6 +144,11 @@ define('quill-nbb', [
 		var selection = quill.getSelection(true);
 		quill.insertText(selection.index, data.value);
 		data.preventDefault = true;
+
+		// hack to convert emoji's inserted text into... an emoji
+		require(['quill-emoji'], function (Emoji) {
+			Emoji.convert.call(quill);
+		});
 	});
 
 	$(window).on('action:composer.updateTextareaSelection', function (evt, data) {
