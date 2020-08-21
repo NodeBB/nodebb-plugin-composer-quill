@@ -1,6 +1,6 @@
 {
   "name": "nodebb-plugin-composer-quill",
-  "version": "1.5.4",
+  "version": "1.5.5",
   "description": "Quill Composer for NodeBB",
   "main": "library.js",
   "repository": {
