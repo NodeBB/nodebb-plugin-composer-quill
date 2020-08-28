@@ -88,16 +88,25 @@ plugin.build = function (data, callback) {
 	callback(null, data);
 };
 
-plugin.savePost = async (data) => {
-	if (migrator.isDelta(data.post.content)) {
-		// Optimistic case: regular post via quill composer
-		data.post.quillDelta = data.post.content;
-		data.post.content = migrator.toHtml(data.post.content);
-	} else {
-		// Fallback to handle write-api and such
-		data.post = migrator.toQuill(data.post);
+plugin.savePost = async (data, path = 'post') => {
+	if (typeof path === 'function') {
+		path = 'post';
 	}
 
+	if (migrator.isDelta(data[path].content)) {
+		// Optimistic case: regular post via quill composer
+		data[path].quillDelta = data[path].content;
+		data[path].content = migrator.toHtml(data[path].content);
+	} else {
+		// Fallback to handle write-api and such
+		data[path] = migrator.toQuill(data[path]);
+	}
+
+	return data;
+};
+
+plugin.savePostQueue = async (data) => {
+	data = await plugin.savePost(data, 'data');
 	return data;
 };
 
