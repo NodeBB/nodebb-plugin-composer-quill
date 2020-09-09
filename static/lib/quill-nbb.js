@@ -289,6 +289,7 @@ window.quill.init = function (targetEl, data, callback) {
 				magicUrl: {
 					normalizeUrlOptions: {
 						sortQueryParameters: false,
+						defaultProtocol: 'https:',
 					},
 				},
 			},
