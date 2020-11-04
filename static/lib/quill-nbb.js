@@ -267,7 +267,7 @@ window.quill.init = function (targetEl, data, callback) {
 				// Chicken-wrapper to pass additional values to handlers (to match composer-default behaviour)
 				var quill = targetEl.data('quill');
 				var selection = quill.getSelection(true);
-				toolbarHandlers[option.name].apply(quill, [textareaEl, selection.index, selection.index + selection.length]);
+				toolbarHandlers[option.name].apply(quill, [textareaEl.get(0), selection.index, selection.index + selection.length]);
 			};
 		});
 		// -- upload privileges
