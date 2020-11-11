@@ -17,7 +17,9 @@ If you used the default composer, chances are you also had the markdown plugin a
 Your posts should automatically work with Quill. Redactor saves HTML into the database, and the Quill plugin is set up so it can digest that html and backport it to Quill's internal format if the post is edited. That said, when you edit a post originally made in Redactor, you'll see the html tags, which are now extraneous. You can remove them as part of your edit. Alternatively, you can use the bundled migrator to convert posts to the Quill-compatible format.
 
 ## Contributors Welcome
-This plugin is in its early stages. If you'd like to look at the [documentation](https://quilljs.com/docs/) and add a feature, or take a look at the GitHub Issues and do something from there then please do. All pull requests lovingly reviewed.
+This plugin is considered _production ready_. Please report any bugs to our issue tracker and we will take a look.
+
+If you'd like to look at the [documentation](https://quilljs.com/docs/) and add a feature, or take a look at the GitHub Issues and do something from there then please do. All pull requests lovingly reviewed.
 
 ## Screenshots
 
