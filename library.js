@@ -144,4 +144,23 @@ plugin.handleMessageEdit = async (data) => {
 	return data;
 };
 
+plugin.handleMessageCheck = async ({ content, length }) => {
+	try {
+		const delta = JSON.parse(content);
+		if (!delta.ops) {
+			throw new Error();
+		}
+
+		content = delta.ops.reduce((memo, cur) => {
+			memo += cur.insert ? cur.insert : '';
+			return memo;
+		}, '');
+		length = String(content).trim().length;
+	} catch (e) {
+		winston.warn('[plugins/quill/handleMessageCheck] Did not receive a delta, ignoring...');
+	}
+
+	return { content, length };
+};
+
 module.exports = plugin;

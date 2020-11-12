@@ -13,7 +13,8 @@
 		{ "hook": "filter:messaging.save", "method": "saveChat" },
 		{ "hook": "filter:messaging.edit", "method": "saveChat" },
 		{ "hook": "filter:post.getRawPost", "method": "handleRawPost" },
-		{ "hook": "filter:messaging.getFields", "method": "handleMessageEdit" }
+		{ "hook": "filter:messaging.getFields", "method": "handleMessageEdit" },
+		{ "hook": "filter:messaging.checkContent", "method": "handleMessageCheck" }
 	],
 	"less": [
 		"../nodebb-plugin-composer-default/static/less/composer.less",

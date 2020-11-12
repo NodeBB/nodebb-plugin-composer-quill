@@ -189,7 +189,7 @@ define('quill-nbb', [
 
 	$(window).on('action:chat.updateRemainingLength', function (evt, data) {
 		var quill = data.parent.find('.ql-container').data('quill');
-		var length = quill.getText().length;
+		var length = quill.getText().length - 1;
 		data.parent.find('[component="chat/message/length"]').text(length);
 		data.parent.find('[component="chat/message/remaining"]').text(config.maximumChatMessageLength - length);
 	});
