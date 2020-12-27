@@ -1,6 +1,6 @@
 'use strict';
 
-/* globals document, $, window, define, socket, app, ajaxify, utils, config */
+/* globals document, $, window, define, socket, app, ajaxify, config */
 
 window.quill = {
 	uploads: {},
@@ -75,7 +75,7 @@ define('quill-nbb', [
 
 	$(window).on('action:composer.uploadUpdate', function (evt, data) {
 		var filename = data.filename.replace(/^\d+_\d+_/, '');
-		var alertId = utils.slugify([data.post_uuid, filename].join('-'));
+		var alertId = [data.post_uuid, filename].join('-');
 
 		if (!window.quill.uploads[filename]) {
 			console.warn('[quill/uploads] Unable to find file (' + filename + ').');
@@ -97,7 +97,7 @@ define('quill-nbb', [
 		var quill = components.get('composer').filter('[data-uuid="' + data.post_uuid + '"]').find('.ql-container').data('quill');
 
 		data.files.forEach((file) => {
-			const alertId = utils.slugify([data.post_uuid, file.filename].join('-'));
+			const alertId = [data.post_uuid, file.filename].join('-');
 			app.removeAlert(alertId);
 
 			// Image vs. file upload
@@ -132,7 +132,7 @@ define('quill-nbb', [
 	$(window).on('action:composer.uploadStart', function (evt, data) {
 		data.files.forEach(function (file) {
 			app.alert({
-				alert_id: utils.slugify([data.post_uuid, file.filename].join('-')),
+				alert_id: [data.post_uuid, file.filename].join('-'),
 				title: file.filename.replace(/\d_\d+_/, ''),
 				message: data.text,
 			});
