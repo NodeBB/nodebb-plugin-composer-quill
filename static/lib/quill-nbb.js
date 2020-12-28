@@ -76,8 +76,7 @@ define('quill-nbb', [
 
 	$(window).on('action:composer.uploadUpdate', function (evt, data) {
 		var filename = data.filename.replace(/^\d+_\d+_/, '');
-		var alertId = generateAlertId(data.post_uuid, data.filename);
-
+		var alertId = generateAlertId(data.post_uuid, filename);
 		if (!window.quill.uploads[filename]) {
 			console.warn('[quill/uploads] Unable to find file (' + filename + ').');
 			app.removeAlert(alertId);
