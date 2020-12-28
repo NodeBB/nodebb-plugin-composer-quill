@@ -10,7 +10,8 @@ define('quill-nbb', [
 	'quill',
 	'composer/resize',
 	'components',
-], function (Quill, resize, components) {
+	'slugify',
+], function (Quill, resize, components, slugify) {
 	$(window).on('action:composer.loaded', function (ev, data) {
 		var postContainer = $('.composer[data-uuid="' + data.post_uuid + '"]');
 		var targetEl = postContainer.find('.write-container div');
@@ -75,7 +76,7 @@ define('quill-nbb', [
 
 	$(window).on('action:composer.uploadUpdate', function (evt, data) {
 		var filename = data.filename.replace(/^\d+_\d+_/, '');
-		var alertId = [data.post_uuid, filename].join('-');
+		var alertId = generateAlertId(data.post_uuid, data.filename);
 
 		if (!window.quill.uploads[filename]) {
 			console.warn('[quill/uploads] Unable to find file (' + filename + ').');
@@ -95,9 +96,8 @@ define('quill-nbb', [
 
 	$(window).on('action:composer.upload', function (evt, data) {
 		var quill = components.get('composer').filter('[data-uuid="' + data.post_uuid + '"]').find('.ql-container').data('quill');
-
 		data.files.forEach((file) => {
-			const alertId = [data.post_uuid, file.filename].join('-');
+			const alertId = generateAlertId(data.post_uuid, file.filename);
 			app.removeAlert(alertId);
 
 			// Image vs. file upload
@@ -132,7 +132,7 @@ define('quill-nbb', [
 	$(window).on('action:composer.uploadStart', function (evt, data) {
 		data.files.forEach(function (file) {
 			app.alert({
-				alert_id: [data.post_uuid, file.filename].join('-'),
+				alert_id: generateAlertId(data.post_uuid, file.filename),
 				title: file.filename.replace(/\d_\d+_/, ''),
 				message: data.text,
 			});
@@ -193,6 +193,10 @@ define('quill-nbb', [
 		data.parent.find('[component="chat/message/length"]').text(length);
 		data.parent.find('[component="chat/message/remaining"]').text(config.maximumChatMessageLength - length);
 	});
+
+	function generateAlertId(uuid, filename) {
+		return slugify([uuid, filename].join('-'));
+	}
 });
 
 // Window events that must be attached immediately
