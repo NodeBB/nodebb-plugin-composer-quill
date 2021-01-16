@@ -129,7 +129,10 @@ plugin.append = async (data) => {
 };
 
 plugin.handleRawPost = async (data) => {
-	data.postData.content = await posts.getPostField(data.postData.pid, 'quillDelta');
+	const delta = await posts.getPostField(data.postData.pid, 'quillDelta');
+	if (delta) {
+		data.postData.content = delta;
+	}
 	return data;
 };
 
