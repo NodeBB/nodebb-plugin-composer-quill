@@ -2369,10 +2369,10 @@ quill-delta@^3.6.2:
     extend "^3.0.2"
     fast-diff "1.1.2"
 
-quill-magic-url@^2.0.0:
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/quill-magic-url/-/quill-magic-url-2.0.1.tgz#2eba141f065cdf0c50ec60ffbb9c54f3aa35a64e"
-  integrity sha512-EXupy/MeRp1rZEanHDxfsoQI8i+XajaR8/ea5ljPT+4rlBC8vUAFgnSfCqOZUcokQ4P/Io9uPG00f75o3+QESA==
+quill-magic-url@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/quill-magic-url/-/quill-magic-url-3.0.0.tgz#26bcea0a412beafcca6d5bfca86ff1f23b9fa36b"
+  integrity sha512-TxEbH7tQL6T/YgONN3N5+3Nxq3sCixnC87EZ9lFZRucvr1LO5nuxfDPJzGDV4fVTgXCXqy5NMBxft7TUFiMq4g==
   dependencies:
     normalize-url "^4.5.0"
     quill-delta "^3.6.2"
