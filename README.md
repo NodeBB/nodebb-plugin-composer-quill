@@ -6,6 +6,20 @@ This plugin activates the WYSIWYG Quill composer for NodeBB. Please ensure that:
 * Any other composers (i.e. nodebb-plugin-composer-default) are disabled
 * **Warning** This composer saves its data in a unique format that is only compatible with Quill. If you switch to Quill, any posts made with Quill cannot be migrated back to Markdown.
 
+## For developers
+
+You may encounter a LESS build error when this module is not installed via npm:
+
+```
+error: [build] Encountered error during build step
+Error: FileError: './quill/dist/quill.bubble.css' wasn't found. Tried - /some,/directories,/here
+/quill.bubble.css,quill/dist/quill.bubble.css in /path/to/nodebb/node_modules/nodebb-plugin-composer-quill/static/less/quill.less on line 2, column 1:
+```
+
+This is due to npm/yarn's flattening of dependencies. Quill expects these css files to be at root level, so to get around this:
+
+`cd /path/to/nodebb/node_modules && ln -s nodebb-plugin-composer-quill/node_modules/quill .`
+
 ## Migration concerns
 
 ### nodebb-plugin-composer-default/nodebb-plugin-markdown
