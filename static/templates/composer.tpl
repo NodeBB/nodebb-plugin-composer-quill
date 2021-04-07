@@ -35,9 +35,11 @@
 				</div>
 			</div>
 
-			<!-- IF isTopic -->
-			<div class="category-list-container hidden-sm hidden-xs"></div>
-			<!-- ENDIF isTopic -->
+			{{{ if isTopic }}}
+			<div class="category-list-container hidden-sm hidden-xs">
+				<!-- IMPORT partials/category-selector.tpl -->
+			</div>
+			{{{ end }}}
 
 			<div class="pull-right draft-icon hidden-xs hidden-sm"></div>
 
