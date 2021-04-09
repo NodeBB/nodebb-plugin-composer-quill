@@ -242,94 +242,84 @@ $(window).on('action:chat.loaded', function (evt, containerEl) {
 window.quill.init = function (targetEl, data, callback) {
 	require([
 		'quill', 'quill-magic-url', 'quill-emoji',
-		'composer/autocomplete', 'composer/formatting', 'composer/drafts',
-	], function (Quill, MagicUrl, Emoji, autocomplete, formatting, drafts) {
+		'composer/autocomplete', 'composer/drafts',
+	], function (Quill, MagicUrl, Emoji, autocomplete, drafts) {
 		var textDirection = $('html').attr('data-dir');
 		var textareaEl = targetEl.siblings('textarea');
-		var toolbarOptions = {
-			container: [
-				[{ header: [1, 2, 3, 4, 5, 6, false] }], // h1..h6
-				[{ font: [] }],
-				['bold', 'italic', 'underline', 'strike'], // toggled buttons
-				['link', 'blockquote', 'code-block'],
-				[{ list: 'ordered' }, { list: 'bullet' }],
-				[{ script: 'sub' }, { script: 'super' }], // superscript/subscript
-				[{ color: [] }, { background: [] }], // dropdown with defaults from theme
-				[{ align: [] }],
-				['clean'],
-			],
-			handlers: {},
-		};
 
-		// Configure toolbar
-		var toolbarHandlers = formatting.getDispatchTable();
-		var group = [];
-		data.formatting.forEach(function (option) {
-			group.push(option.name);
-			toolbarOptions.handlers[option.name] = function () {
-				// Chicken-wrapper to pass additional values to handlers (to match composer-default behaviour)
-				var quill = targetEl.data('quill');
-				var selection = quill.getSelection(true);
-				toolbarHandlers[option.name].apply(quill, [textareaEl.get(0), selection.index, selection.index + selection.length]);
-			};
-		});
-		// -- upload privileges
-		['upload:post:file', 'upload:post:image'].forEach(function (privilege) {
-			if (app.user.privileges[privilege]) {
-				var name = privilege === 'upload:post:image' ? 'picture' : 'upload';
-				group.unshift(name);
-				toolbarOptions.handlers[name] = toolbarHandlers[name].bind($('.formatting-bar'));
-			}
-		});
-		toolbarOptions.container.push(group);
-
-		// Quill...
-		Quill.register('modules/magicUrl', MagicUrl.default);
-		var quill = new Quill(targetEl.get(0), {
-			theme: data.theme || 'snow',
-			modules: {
-				toolbar: toolbarOptions,
-				magicUrl: {
-					normalizeUrlOptions: {
-						sortQueryParameters: false,
-						defaultProtocol: 'https:',
+		window.quill.configureToolbar(targetEl, data).then(({ toolbar }) => {
+			// Quill...
+			Quill.register('modules/magicUrl', MagicUrl.default);
+			var quill = new Quill(targetEl.get(0), {
+				theme: data.theme || 'snow',
+				modules: {
+					toolbar,
+					magicUrl: {
+						normalizeUrlOptions: {
+							sortQueryParameters: false,
+							defaultProtocol: 'https:',
+						},
 					},
 				},
-			},
-			bounds: data.bounds || document.body,
-		});
-		targetEl.data('quill', quill);
-		targetEl.find('.ql-editor').addClass('write');
+				bounds: data.bounds || document.body,
+			});
+			targetEl.data('quill', quill);
+			targetEl.find('.ql-editor').addClass('write');
 
-		// Configure toolbar icons (must be done after quill itself is instantiated)
-		var toolbarEl = targetEl.siblings('.ql-toolbar').length ? targetEl.siblings('.ql-toolbar') : targetEl.find('.ql-toolbar');
-		data.formatting.forEach(function (option) {
-			var buttonEl = toolbarEl.find('.ql-' + option.name);
-			buttonEl.html('<i class="' + option.className + '"></i>');
-			if (option.mobile) {
-				buttonEl.addClass('visible-xs');
-			}
-		});
-		['upload:post:image', 'upload:post:file'].forEach(function (privilege) {
-			if (app.user.privileges[privilege]) {
-				var className = privilege === 'upload:post:image' ? 'picture' : 'upload';
-				var buttonEl = toolbarEl.find('.ql-' + className);
-				if (className === 'picture') {
-					buttonEl.html('<i class="fa fa-file-image-o"></i>');
-				} else {
-					buttonEl.html('<span class="fa-stack"><i class="fa fa-file-o fa-stack-1x"></i><i class="fa fa-arrow-up fa-stack-1x"></i></span>');
+			// Configure toolbar icons (must be done after quill itself is instantiated)
+			var toolbarEl = targetEl.siblings('.ql-toolbar').length ? targetEl.siblings('.ql-toolbar') : targetEl.find('.ql-toolbar');
+			data.formatting.forEach(function (option) {
+				var buttonEl = toolbarEl.find('.ql-' + option.name);
+				buttonEl.html('<i class="' + option.className + '"></i>');
+				if (option.mobile) {
+					buttonEl.addClass('visible-xs');
 				}
-			}
-		});
+			});
+			['upload:post:image', 'upload:post:file'].forEach(function (privilege) {
+				if (app.user.privileges[privilege]) {
+					var className = privilege === 'upload:post:image' ? 'picture' : 'upload';
+					var buttonEl = toolbarEl.find('.ql-' + className);
+					if (className === 'picture') {
+						buttonEl.html('<i class="fa fa-file-image-o"></i>');
+					} else {
+						buttonEl.html('<span class="fa-stack"><i class="fa fa-file-o fa-stack-1x"></i><i class="fa fa-arrow-up fa-stack-1x"></i></span>');
+					}
+				}
+			});
 
-		$(window).trigger('action:quill.load', quill);
+			$(window).trigger('action:quill.load', quill);
 
-		// Restore text if contained in composerData or drafts
-		const draft = data.composerData && drafts.get(data.composerData.save_id);
-		if (data.composerData && data.composerData.body) {
-			try {
-				var unescaped = data.composerData.body.replace(/&quot;/g, '"');
-				var delta = JSON.parse(unescaped);
+			// Restore text if contained in composerData or drafts
+			const draft = data.composerData && drafts.get(data.composerData.save_id);
+			if (data.composerData && data.composerData.body) {
+				try {
+					var unescaped = data.composerData.body.replace(/&quot;/g, '"');
+					var delta = JSON.parse(unescaped);
+					delta.ops.push({
+						insert: '\n',
+						attributes: {
+							direction: textDirection,
+							align: textDirection === 'rtl' ? 'right' : 'left',
+						},
+					});
+					quill.setContents(delta, 'api');
+				} catch (e) {
+					quill.setContents({ ops: [{
+						insert: data.composerData.body.toString(),
+						attributes: {
+							direction: textDirection,
+							align: textDirection === 'rtl' ? 'right' : 'left',
+						},
+					}] }, 'api');
+				}
+
+				// Move cursor to the very end
+				var length = quill.getLength();
+				quill.setSelection(length);
+			} else if (draft && draft.text) {
+				// Set title
+				targetEl.parents('.composer').find('.title').val(draft.title);
+				const delta = JSON.parse(draft.text);
 				delta.ops.push({
 					insert: '\n',
 					attributes: {
@@ -338,79 +328,101 @@ window.quill.init = function (targetEl, data, callback) {
 					},
 				});
 				quill.setContents(delta, 'api');
-			} catch (e) {
-				quill.setContents({ ops: [{
-					insert: data.composerData.body.toString(),
-					attributes: {
-						direction: textDirection,
-						align: textDirection === 'rtl' ? 'right' : 'left',
-					},
-				}] }, 'api');
 			}
 
-			// Move cursor to the very end
-			var length = quill.getLength();
-			quill.setSelection(length);
-		} else if (draft && draft.text) {
-			// Set title
-			targetEl.parents('.composer').find('.title').val(draft.title);
-			const delta = JSON.parse(draft.text);
-			delta.ops.push({
-				insert: '\n',
-				attributes: {
-					direction: textDirection,
-					align: textDirection === 'rtl' ? 'right' : 'left',
-				},
+			// Automatic RTL support
+			quill.format('direction', textDirection);
+			quill.format('align', textDirection === 'rtl' ? 'right' : 'left');
+
+			autocomplete.init(targetEl, data.post_uuid);
+			Emoji.enable(quill);
+
+			// Update textarea on editor-change event. This allows compatibility with
+			// how NodeBB handles things like drafts, etc.
+			quill.on('editor-change', function () {
+				textareaEl.val(JSON.stringify(quill.getContents()));
+				textareaEl.trigger('change');
+				textareaEl.trigger('keyup');
 			});
-			quill.setContents(delta, 'api');
-		}
 
-		// Automatic RTL support
-		quill.format('direction', textDirection);
-		quill.format('align', textDirection === 'rtl' ? 'right' : 'left');
+			// Special handling on text-change
+			quill.on('text-change', function () {
+				if (window.quill.isEmpty(quill)) {
+					quill.deleteText(0, quill.getLength());
+					textareaEl.val('');
+				}
+			});
 
-		autocomplete.init(targetEl, data.post_uuid);
-		Emoji.enable(quill);
+			// Handle tab/enter for autocomplete
+			var doAutocomplete = function () {
+				setTimeout(Emoji.convert.bind(quill), 0);
+				return !$('.composer-autocomplete-dropdown-' + data.post_uuid + ':visible').length;
+			};
+			[9, 13].forEach(function (keyCode) {
+				quill.keyboard.addBinding({
+					key: keyCode,
+				}, doAutocomplete);
+				quill.keyboard.bindings[keyCode].unshift(quill.keyboard.bindings[keyCode].pop());
+			});
 
-		// Update textarea on editor-change event. This allows compatibility with
-		// how NodeBB handles things like drafts, etc.
-		quill.on('editor-change', function () {
-			textareaEl.val(JSON.stringify(quill.getContents()));
-			textareaEl.trigger('change');
-			textareaEl.trigger('keyup');
-		});
+			if (!data.composerData || data.composerData.action !== 'topics.post') {
+				// Oddly, a 0ms timeout is required here otherwise .focus() does not work
+				setTimeout(quill.focus.bind(quill), 0);
+			}
 
-		// Special handling on text-change
-		quill.on('text-change', function () {
-			if (window.quill.isEmpty(quill)) {
-				quill.deleteText(0, quill.getLength());
-				textareaEl.val('');
+			if (typeof callback === 'function') {
+				callback();
 			}
 		});
-
-		// Handle tab/enter for autocomplete
-		var doAutocomplete = function () {
-			setTimeout(Emoji.convert.bind(quill), 0);
-			return !$('.composer-autocomplete-dropdown-' + data.post_uuid + ':visible').length;
-		};
-		[9, 13].forEach(function (keyCode) {
-			quill.keyboard.addBinding({
-				key: keyCode,
-			}, doAutocomplete);
-			quill.keyboard.bindings[keyCode].unshift(quill.keyboard.bindings[keyCode].pop());
-		});
-
-		if (!data.composerData || data.composerData.action !== 'topics.post') {
-			// Oddly, a 0ms timeout is required here otherwise .focus() does not work
-			setTimeout(quill.focus.bind(quill), 0);
-		}
-
-		if (typeof callback === 'function') {
-			callback();
-		}
 	});
 
 	return window.quill;
+};
+
+window.quill.configureToolbar = async (targetEl, data) => {
+	var textareaEl = targetEl.siblings('textarea');
+	const [formatting, hooks] = await new Promise((resolve) => {
+		require(['composer/formatting', 'hooks'], (...libs) => resolve(libs));
+	});
+	const toolbar = {
+		container: [
+			[{ header: [1, 2, 3, 4, 5, 6, false] }], // h1..h6
+			[{ font: [] }],
+			['bold', 'italic', 'underline', 'strike'], // toggled buttons
+			['link', 'blockquote', 'code-block'],
+			[{ list: 'ordered' }, { list: 'bullet' }],
+			[{ script: 'sub' }, { script: 'super' }], // superscript/subscript
+			[{ color: [] }, { background: [] }], // dropdown with defaults from theme
+			[{ align: [] }],
+			['clean'],
+		],
+		handlers: {},
+	};
+
+	// Configure toolbar
+	var toolbarHandlers = formatting.getDispatchTable();
+	var group = [];
+	data.formatting.forEach(function (option) {
+		group.push(option.name);
+		toolbar.handlers[option.name] = function () {
+			// Chicken-wrapper to pass additional values to handlers (to match composer-default behaviour)
+			var quill = targetEl.data('quill');
+			var selection = quill.getSelection(true);
+			toolbarHandlers[option.name].apply(quill, [textareaEl.get(0), selection.index, selection.index + selection.length]);
+		};
+	});
+	// -- upload privileges
+	['upload:post:file', 'upload:post:image'].forEach(function (privilege) {
+		if (app.user.privileges[privilege]) {
+			var name = privilege === 'upload:post:image' ? 'picture' : 'upload';
+			group.unshift(name);
+			toolbar.handlers[name] = toolbarHandlers[name].bind($('.formatting-bar'));
+		}
+	});
+	toolbar.container.push(group);
+
+	// Allow plugins to modify toolbar
+	return await hooks.fire('filter:quill.toolbar', { toolbar });
 };
 
 window.quill.isEmpty = function (quill) {
