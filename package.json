@@ -48,8 +48,8 @@
     ]
   },
   "devDependencies": {
-    "@commitlint/cli": "12.1.3",
-    "@commitlint/config-angular": "12.1.3",
+    "@commitlint/cli": "12.1.4",
+    "@commitlint/config-angular": "12.1.4",
     "eslint": "7.26.0",
     "eslint-config-airbnb-base": "12.1.0",
     "eslint-plugin-import": "2.22.1",
