@@ -1,6 +1,6 @@
 'use strict';
 
-/* globals $, define, socket, app, config */
+/* globals define, socket, app, config */
 
 /**
  * DEVELOPER NOTE
@@ -17,42 +17,49 @@
  * for a hook to be fired by autocomplete, of which there is none right now.
  */
 
-define('quill-emoji', ['quill'], function (quill) {
-	var Emoji = {
+define('quill-emoji', ['quill'], (quill) => {
+	const Emoji = {
 		table: {},
-		blots: {},
 	};
 
 	// Emoji Blot
-	var imageBlot = quill.import('formats/image');
-	var emojiAttributes = ['alt', 'class'];
-	Emoji.blots.emoji = $.extend(true, imageBlot, {
-		blotName: 'emoji',
-		formats: function (domNode) {
+	const imageBlot = quill.import('formats/image');
+	const emojiAttributes = ['alt', 'class'];
+
+	class EmojiBlot extends imageBlot {
+		static create(value) {
+			const node = super.create(value.src);
+			node.setAttribute('class', value.class);
+			return node;
+		}
+
+		static formats(domNode) {
 			return emojiAttributes.reduce((formats, attribute) => {
 				if (domNode.hasAttribute(attribute)) {
 					formats[attribute] = domNode.getAttribute(attribute);
 				}
 				return formats;
 			}, {});
-		},
-	});
-	Emoji.blots.emoji.prototype.format = function (name, value) {
-		if (emojiAttributes.includes(name)) {
-			if (value) {
-				this.domNode.setAttribute(name, value);
-			} else {
-				this.domNode.removeAttribute(name);
-			}
-		} else {
-			imageBlot.format(name, value);
 		}
-	};
-	quill.register(Emoji.blots.emoji);
+
+		static format(name, value) {
+			if (emojiAttributes.includes(name)) {
+				if (value) {
+					this.domNode.setAttribute(name, value);
+				} else {
+					this.domNode.removeAttribute(name);
+				}
+			} else {
+				super.format(name, value);
+			}
+		}
+	}
+	EmojiBlot.blotName = 'emoji';
+	quill.register(EmojiBlot);
 
 	Emoji.enable = function (quill) {
 		if (!Object.keys(Emoji.table).length) {
-			socket.emit('plugins.composer-quill.getEmojiTable', {}, function (err, table) {
+			socket.emit('plugins.composer-quill.getEmojiTable', {}, (err, table) => {
 				if (err) {
 					app.alertError(err.message);
 				}
@@ -66,27 +73,29 @@ define('quill-emoji', ['quill'], function (quill) {
 	};
 
 	Emoji.convert = function (delta) {
-		var quill = this;
-		var contents = quill.getContents();
-		var emojiRegex = /:([\w+-]+):/g;
+		const quill = this;
+		const contents = quill.getContents();
+		const emojiRegex = /:([\w+-]+):/g;
 
 		// Special handling for emoji plugin
 		if (!delta || delta.ops.some(command => command.insert && (command.insert === ':' || String(command.insert).endsWith(':') || String(command.insert).endsWith(': \n')))) {
 			// Check all nodes for emoji shorthand and replace with image
-			contents.reduce(function (retain, cur) {
-				var match = emojiRegex.exec(cur.insert);
-				var contents;
-				var emojiObj;
+			contents.reduce((retain, cur) => {
+				let match = emojiRegex.exec(cur.insert);
+				let contents;
+				let emojiObj;
 				while (match !== null) {
 					emojiObj = Emoji.table[match[1]];
 					if (emojiObj) {
 						contents = [{
 							insert: {
-								emoji: config.relative_path + '/plugins/nodebb-plugin-emoji/emoji/' + emojiObj.pack + '/' + emojiObj.image + '?' + app.cacheBuster,
+								emoji: {
+									url: `${config.relative_path}/plugins/nodebb-plugin-emoji/emoji/${emojiObj.pack}/${emojiObj.image}?${app.cacheBuster}`,
+									class: `not-responsive emoji emoji-${emojiObj.pack} emoji--${emojiObj.name}`,
+								},
 							},
 							attributes: {
 								alt: emojiObj.character,
-								class: 'not-responsive emoji emoji-' + emojiObj.pack + ' emoji--' + emojiObj.name,
 							},
 						}];
 						if (match[0].length) {
