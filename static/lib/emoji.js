@@ -16,7 +16,7 @@
  * .convert() is called during composer autocomplete, which could be listening
  * for a hook to be fired by autocomplete, of which there is none right now.
  *
- * 2 June 2011 -- core now has client-side hooks, which will allow this to happen.
+ * 2 June 2021 -- core now has client-side hooks, which will allow this to happen.
  */
 
 define('quill-emoji', ['quill'], (quill) => {
