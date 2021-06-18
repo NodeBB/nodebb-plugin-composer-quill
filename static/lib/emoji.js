@@ -92,7 +92,7 @@ define('quill-emoji', ['quill'], (quill) => {
 						contents = [{
 							insert: {
 								emoji: {
-									url: `${config.relative_path}/plugins/nodebb-plugin-emoji/emoji/${emojiObj.pack}/${emojiObj.image}?${app.cacheBuster}`,
+									src: `${config.relative_path}/plugins/nodebb-plugin-emoji/emoji/${emojiObj.pack}/${emojiObj.image}?${app.cacheBuster}`,
 									class: `not-responsive emoji emoji-${emojiObj.pack} emoji--${emojiObj.name}`,
 								},
 							},
