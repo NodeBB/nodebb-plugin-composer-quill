@@ -2,7 +2,8 @@
 
 const SocketPlugins = require.main.require('./src/socket.io/plugins');
 const SocketAdmin = require.main.require('./src/socket.io/admin').plugins;
-SocketAdmin['composer-quill'] = require('./lib/adminsockets.js');
+SocketAdmin['composer-quill'] = require('./lib/adminsockets');
+
 const defaultComposer = require.main.require('nodebb-plugin-composer-default');
 const plugins = module.parent.exports;
 const meta = require.main.require('./src/meta');
@@ -11,6 +12,7 @@ const messaging = require.main.require('./src/messaging');
 const helpers = require.main.require('./src/controllers/helpers');
 
 const async = require('async');
+
 const winston = require.main.require('winston');
 const nconf = require.main.require('nconf');
 
@@ -20,16 +22,16 @@ const migrator = require('./lib/migrator');
 const plugin = {};
 
 plugin.init = function (data, callback) {
-	const router = data.router;
+	const { router } = data;
 	const hostMiddleware = data.middleware;
 
 	router.get('/admin/plugins/composer-quill', hostMiddleware.admin.buildHeader, controllers.renderAdminPage);
 	router.get('/api/admin/plugins/composer-quill', controllers.renderAdminPage);
 
 	// Expose the default composer's socket method calls for this composer as well
-	plugin.checkCompatibility(function (err, checks) {
+	plugin.checkCompatibility((err, checks) => {
 		if (err) {
-			return winston.error('[plugin/composer-quill] Error initialising plugin: ' + err.message);
+			return winston.error(`[plugin/composer-quill] Error initialising plugin: ${err.message}`);
 		}
 
 		if (checks.composer) {
@@ -47,12 +49,10 @@ plugin.checkCompatibility = function (callback) {
 	async.parallel({
 		active: async.apply(plugins.getActive),
 		markdown: async.apply(meta.settings.get, 'markdown'),
-	}, function (err, data) {
+	}, (err, data) => {
 		callback(err, {
 			markdown: data.active.indexOf('nodebb-plugin-markdown') === -1,	// plugin disabled
-			composer: data.active.filter(function (plugin) {
-				return plugin.startsWith('nodebb-plugin-composer-') && plugin !== 'nodebb-plugin-composer-quill';
-			}).length === 0,
+			composer: data.active.filter(plugin => plugin.startsWith('nodebb-plugin-composer-') && plugin !== 'nodebb-plugin-composer-quill').length === 0,
 		});
 	});
 };
@@ -69,8 +69,8 @@ plugin.addAdminNavigation = function (header, callback) {
 
 plugin.build = function (data, callback) {
 	// No plans for a standalone composer route, so handle redirection on f5
-	var req = data.req;
-	var res = data.res;
+	const { req } = data;
+	const { res } = data;
 
 	if (req.query.p) {
 		if (!res.locals.isAPI) {
