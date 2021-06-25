@@ -11,18 +11,18 @@ define('quill-nbb', [
 	'composer/resize',
 	'components',
 	'slugify',
-], function (Quill, resize, components, slugify) {
-	$(window).on('action:composer.loaded', function (ev, data) {
-		var postContainer = $('.composer[data-uuid="' + data.post_uuid + '"]');
-		var targetEl = postContainer.find('.write-container div');
+], (Quill, resize, components, slugify) => {
+	$(window).on('action:composer.loaded', (ev, data) => {
+		const postContainer = $(`.composer[data-uuid="${data.post_uuid}"]`);
+		const targetEl = postContainer.find('.write-container div');
 
 		window.quill.init(targetEl, data);
 
-		var cidEl = postContainer.find('.category-list');
+		const cidEl = postContainer.find('.category-list');
 		if (cidEl.length) {
-			cidEl.attr('id', 'cmp-cid-' + data.post_uuid);
+			cidEl.attr('id', `cmp-cid-${data.post_uuid}`);
 		} else {
-			postContainer.append('<input id="cmp-cid-' + data.post_uuid + '" type="hidden" value="' + ajaxify.data.cid + '"/>');
+			postContainer.append(`<input id="cmp-cid-${data.post_uuid}" type="hidden" value="${ajaxify.data.cid}"/>`);
 		}
 
 		// if (config.allowTopicsThumbnail && data.composerData.isMain) {
@@ -45,24 +45,24 @@ define('quill-nbb', [
 		resize.reposition(postContainer);
 	});
 
-	$(window).on('action:composer.check', function (ev, data) {
+	$(window).on('action:composer.check', (ev, data) => {
 		// Update bodyLen for length checking purposes
-		var quill = components.get('composer').filter('[data-uuid="' + data.post_uuid + '"]').find('.ql-container').data('quill');
+		const quill = components.get('composer').filter(`[data-uuid="${data.post_uuid}"]`).find('.ql-container').data('quill');
 		data.bodyLen = quill.getLength() - 1;
 	});
 
-	$(window).on('action:chat.sent', function (evt, data) {
+	$(window).on('action:chat.sent', (evt, data) => {
 		// Empty chat input
-		var quill = $('.chat-modal[data-roomid="' + data.roomId + '"] .ql-container, .expanded-chat[data-roomid="' + data.roomId + '"] .ql-container').data('quill');
+		const quill = $(`.chat-modal[data-roomid="${data.roomId}"] .ql-container, .expanded-chat[data-roomid="${data.roomId}"] .ql-container`).data('quill');
 		quill.deleteText(0, quill.getLength());
 
 		// Reset text direction
-		var textDirection = $('html').attr('data-dir');
+		const textDirection = $('html').attr('data-dir');
 		quill.format('direction', textDirection);
 		quill.format('align', textDirection === 'rtl' ? 'right' : 'left');
 	});
 
-	$(window).on('action:chat.prepEdit', function (evt, data) {
+	$(window).on('action:chat.prepEdit', (evt, data) => {
 		let value = data.inputEl.val();
 		const quill = data.inputEl.siblings('.ql-container').data('quill');
 
@@ -74,11 +74,11 @@ define('quill-nbb', [
 		}
 	});
 
-	$(window).on('action:composer.uploadUpdate', function (evt, data) {
-		var filename = data.filename.replace(/^\d+_\d+_/, '');
-		var alertId = generateAlertId(data.post_uuid, filename);
+	$(window).on('action:composer.uploadUpdate', (evt, data) => {
+		const filename = data.filename.replace(/^\d+_\d+_/, '');
+		const alertId = generateAlertId(data.post_uuid, filename);
 		if (!window.quill.uploads[filename]) {
-			console.warn('[quill/uploads] Unable to find file (' + filename + ').');
+			console.warn(`[quill/uploads] Unable to find file (${filename}).`);
 			app.removeAlert(alertId);
 			return;
 		}
@@ -93,8 +93,8 @@ define('quill-nbb', [
 		}
 	});
 
-	$(window).on('action:composer.upload', function (evt, data) {
-		var quill = components.get('composer').filter('[data-uuid="' + data.post_uuid + '"]').find('.ql-container').data('quill');
+	$(window).on('action:composer.upload', (evt, data) => {
+		const quill = components.get('composer').filter(`[data-uuid="${data.post_uuid}"]`).find('.ql-container').data('quill');
 		data.files.forEach((file) => {
 			const alertId = generateAlertId(data.post_uuid, file.filename);
 			app.removeAlert(alertId);
@@ -103,10 +103,10 @@ define('quill-nbb', [
 			if (file.isImage) {
 				quill.insertEmbed(quill.getSelection().index, 'image', file.url);
 			} else {
-				var selection = quill.getSelection();
+				const selection = quill.getSelection();
 
 				if (selection.length) {
-					var linkText = quill.getText(selection.index, selection.length);
+					const linkText = quill.getText(selection.index, selection.length);
 					quill.deleteText(selection.index, selection.length);
 					quill.insertText(selection.index, linkText, {
 						link: file.url,
@@ -120,16 +120,16 @@ define('quill-nbb', [
 		});
 	});
 
-	$(window).on('action:composer.uploadError', function (evt, data) {
-		var quill = components.get('composer').filter('[data-uuid="' + data.post_uuid + '"]').find('.ql-container').data('quill');
-		var textareaEl = components.get('composer').filter('[data-uuid="' + data.post_uuid + '"]').find('textarea');
+	$(window).on('action:composer.uploadError', (evt, data) => {
+		const quill = components.get('composer').filter(`[data-uuid="${data.post_uuid}"]`).find('.ql-container').data('quill');
+		const textareaEl = components.get('composer').filter(`[data-uuid="${data.post_uuid}"]`).find('textarea');
 		textareaEl.val(!window.quill.isEmpty(quill) ? JSON.stringify(quill.getContents()) : '');
 		textareaEl.trigger('change');
 		textareaEl.trigger('keyup');
 	});
 
-	$(window).on('action:composer.uploadStart', function (evt, data) {
-		data.files.forEach(function (file) {
+	$(window).on('action:composer.uploadStart', (evt, data) => {
+		data.files.forEach((file) => {
 			app.alert({
 				alert_id: generateAlertId(data.post_uuid, file.filename),
 				title: file.filename.replace(/\d_\d+_/, ''),
@@ -138,30 +138,30 @@ define('quill-nbb', [
 		});
 	});
 
-	$(window).on('action:composer.insertIntoTextarea', function (evt, data) {
+	$(window).on('action:composer.insertIntoTextarea', (evt, data) => {
 		const quill = $(data.textarea).siblings('.ql-container').data('quill');
-		var selection = quill.getSelection(true);
+		const selection = quill.getSelection(true);
 		quill.insertText(selection.index, data.value);
 		data.preventDefault = true;
 
 		// hack to convert emoji's inserted text into... an emoji
-		require(['quill-emoji'], function (Emoji) {
+		require(['quill-emoji'], (Emoji) => {
 			Emoji.convert.call(quill);
 		});
 	});
 
-	$(window).on('action:composer.updateTextareaSelection', function (evt, data) {
+	$(window).on('action:composer.updateTextareaSelection', (evt, data) => {
 		const quill = $(data.textarea).siblings('.ql-container').data('quill');
 		quill.setSelection(data.start, data.end - data.start);
 		data.preventDefault = true;
 	});
 
-	$(window).on('action:composer.wrapSelectionInTextareaWith', function (evt, data) {
+	$(window).on('action:composer.wrapSelectionInTextareaWith', (evt, data) => {
 		const Delta = Quill.import('delta');
 		const quill = $(data.textarea).siblings('.ql-container').data('quill');
 
-		var range = quill.getSelection();
-		var insertionDelta;
+		const range = quill.getSelection();
+		let insertionDelta;
 
 		if (range.length) {
 			insertionDelta = quill.getContents(range.index, range.length);
@@ -175,8 +175,7 @@ define('quill-nbb', [
 			.delete(range.length)
 			.insert(data.leading)
 			.concat(insertionDelta)
-			.insert(data.trailing)
-		);
+			.insert(data.trailing));
 
 		if (range.length) {
 			// Update selection
@@ -186,9 +185,9 @@ define('quill-nbb', [
 		data.preventDefault = true;
 	});
 
-	$(window).on('action:chat.updateRemainingLength', function (evt, data) {
-		var quill = data.parent.find('.ql-container').data('quill');
-		var length = quill.getText().length - 1;
+	$(window).on('action:chat.updateRemainingLength', (evt, data) => {
+		const quill = data.parent.find('.ql-container').data('quill');
+		const length = quill.getText().length - 1;
 		data.parent.find('[component="chat/message/length"]').text(length);
 		data.parent.find('[component="chat/message/remaining"]').text(config.maximumChatMessageLength - length);
 	});
@@ -200,16 +199,16 @@ define('quill-nbb', [
 
 // Window events that must be attached immediately
 
-$(window).on('action:chat.loaded', function (evt, containerEl) {
+$(window).on('action:chat.loaded', (evt, containerEl) => {
 	require([
 		'composer',
 		'composer/autocomplete',
 		'components',
-	], function (composer, autocomplete, components) {
+	], (composer, autocomplete, components) => {
 		// Create div element for composer
-		var targetEl = $('<div></div>').insertBefore(components.get('chat/input'));
+		const targetEl = $('<div></div>').insertBefore(components.get('chat/input'));
 
-		var onInit = function () {
+		const onInit = function () {
 			autocomplete.init($(containerEl));
 		};
 
@@ -221,7 +220,7 @@ $(window).on('action:chat.loaded', function (evt, containerEl) {
 				bounds: containerEl,
 			}, onInit);
 		} else {
-			socket.emit('plugins.composer.getFormattingOptions', function (err, options) {
+			socket.emit('plugins.composer.getFormattingOptions', (err, options) => {
 				if (err) {
 					app.alertError(err.message);
 				}
@@ -243,14 +242,14 @@ window.quill.init = function (targetEl, data, callback) {
 	require([
 		'quill', 'quill-magic-url', 'quill-emoji',
 		'composer/autocomplete', 'composer/drafts',
-	], function (Quill, MagicUrl, Emoji, autocomplete, drafts) {
-		var textDirection = $('html').attr('data-dir');
-		var textareaEl = targetEl.siblings('textarea');
+	], (Quill, MagicUrl, Emoji, autocomplete, drafts) => {
+		const textDirection = $('html').attr('data-dir');
+		const textareaEl = targetEl.siblings('textarea');
 
 		window.quill.configureToolbar(targetEl, data).then(({ toolbar }) => {
 			// Quill...
 			Quill.register('modules/magicUrl', MagicUrl.default);
-			var quill = new Quill(targetEl.get(0), {
+			const quill = new Quill(targetEl.get(0), {
 				theme: data.theme || 'snow',
 				modules: {
 					toolbar,
@@ -267,18 +266,18 @@ window.quill.init = function (targetEl, data, callback) {
 			targetEl.find('.ql-editor').addClass('write');
 
 			// Configure toolbar icons (must be done after quill itself is instantiated)
-			var toolbarEl = targetEl.siblings('.ql-toolbar').length ? targetEl.siblings('.ql-toolbar') : targetEl.find('.ql-toolbar');
-			data.formatting.forEach(function (option) {
-				var buttonEl = toolbarEl.find('.ql-' + option.name);
-				buttonEl.html('<i class="' + option.className + '"></i>');
+			const toolbarEl = targetEl.siblings('.ql-toolbar').length ? targetEl.siblings('.ql-toolbar') : targetEl.find('.ql-toolbar');
+			data.formatting.forEach((option) => {
+				const buttonEl = toolbarEl.find(`.ql-${option.name}`);
+				buttonEl.html(`<i class="${option.className}"></i>`);
 				if (option.mobile) {
 					buttonEl.addClass('visible-xs');
 				}
 			});
-			['upload:post:image', 'upload:post:file'].forEach(function (privilege) {
+			['upload:post:image', 'upload:post:file'].forEach((privilege) => {
 				if (app.user.privileges[privilege]) {
-					var className = privilege === 'upload:post:image' ? 'picture' : 'upload';
-					var buttonEl = toolbarEl.find('.ql-' + className);
+					const className = privilege === 'upload:post:image' ? 'picture' : 'upload';
+					const buttonEl = toolbarEl.find(`.ql-${className}`);
 					if (className === 'picture') {
 						buttonEl.html('<i class="fa fa-file-image-o"></i>');
 					} else {
@@ -293,8 +292,8 @@ window.quill.init = function (targetEl, data, callback) {
 			const draft = data.composerData && drafts.get(data.composerData.save_id);
 			if (data.composerData && data.composerData.body) {
 				try {
-					var unescaped = data.composerData.body.replace(/&quot;/g, '"');
-					var delta = JSON.parse(unescaped);
+					const unescaped = data.composerData.body.replace(/&quot;/g, '"');
+					const delta = JSON.parse(unescaped);
 					delta.ops.push({
 						insert: '\n',
 						attributes: {
@@ -304,17 +303,19 @@ window.quill.init = function (targetEl, data, callback) {
 					});
 					quill.setContents(delta, 'api');
 				} catch (e) {
-					quill.setContents({ ops: [{
-						insert: data.composerData.body.toString(),
-						attributes: {
-							direction: textDirection,
-							align: textDirection === 'rtl' ? 'right' : 'left',
-						},
-					}] }, 'api');
+					quill.setContents({
+						ops: [{
+							insert: data.composerData.body.toString(),
+							attributes: {
+								direction: textDirection,
+								align: textDirection === 'rtl' ? 'right' : 'left',
+							},
+						}],
+					}, 'api');
 				}
 
 				// Move cursor to the very end
-				var length = quill.getLength();
+				const length = quill.getLength();
 				quill.setSelection(length);
 			} else if (draft && draft.text) {
 				// Set title
@@ -339,14 +340,14 @@ window.quill.init = function (targetEl, data, callback) {
 
 			// Update textarea on editor-change event. This allows compatibility with
 			// how NodeBB handles things like drafts, etc.
-			quill.on('editor-change', function () {
+			quill.on('editor-change', () => {
 				textareaEl.val(JSON.stringify(quill.getContents()));
 				textareaEl.trigger('change');
 				textareaEl.trigger('keyup');
 			});
 
 			// Special handling on text-change
-			quill.on('text-change', function () {
+			quill.on('text-change', () => {
 				if (window.quill.isEmpty(quill)) {
 					quill.deleteText(0, quill.getLength());
 					textareaEl.val('');
@@ -354,11 +355,11 @@ window.quill.init = function (targetEl, data, callback) {
 			});
 
 			// Handle tab/enter for autocomplete
-			var doAutocomplete = function () {
+			const doAutocomplete = function () {
 				setTimeout(Emoji.convert.bind(quill), 0);
-				return !$('.composer-autocomplete-dropdown-' + data.post_uuid + ':visible').length;
+				return !$(`.composer-autocomplete-dropdown-${data.post_uuid}:visible`).length;
 			};
-			[9, 13].forEach(function (keyCode) {
+			[9, 13].forEach((keyCode) => {
 				quill.keyboard.addBinding({
 					key: keyCode,
 				}, doAutocomplete);
@@ -380,7 +381,7 @@ window.quill.init = function (targetEl, data, callback) {
 };
 
 window.quill.configureToolbar = async (targetEl, data) => {
-	var textareaEl = targetEl.siblings('textarea');
+	const textareaEl = targetEl.siblings('textarea');
 	const [formatting, hooks] = await new Promise((resolve) => {
 		require(['composer/formatting', 'hooks'], (...libs) => resolve(libs));
 	});
@@ -400,21 +401,24 @@ window.quill.configureToolbar = async (targetEl, data) => {
 	};
 
 	// Configure toolbar
-	var toolbarHandlers = formatting.getDispatchTable();
-	var group = [];
-	data.formatting.forEach(function (option) {
+	const toolbarHandlers = formatting.getDispatchTable();
+	const group = [];
+	data.formatting.forEach((option) => {
 		group.push(option.name);
 		toolbar.handlers[option.name] = function () {
 			// Chicken-wrapper to pass additional values to handlers (to match composer-default behaviour)
-			var quill = targetEl.data('quill');
-			var selection = quill.getSelection(true);
-			toolbarHandlers[option.name].apply(quill, [textareaEl.get(0), selection.index, selection.index + selection.length]);
+			const quill = targetEl.data('quill');
+			const selection = quill.getSelection(true);
+			toolbarHandlers[option.name].apply(
+				quill,
+				[textareaEl.get(0), selection.index, selection.index + selection.length]
+			);
 		};
 	});
 	// -- upload privileges
-	['upload:post:file', 'upload:post:image'].forEach(function (privilege) {
+	['upload:post:file', 'upload:post:image'].forEach((privilege) => {
 		if (app.user.privileges[privilege]) {
-			var name = privilege === 'upload:post:image' ? 'picture' : 'upload';
+			const name = privilege === 'upload:post:image' ? 'picture' : 'upload';
 			group.unshift(name);
 			toolbar.handlers[name] = toolbarHandlers[name].bind($('.formatting-bar'));
 		}
