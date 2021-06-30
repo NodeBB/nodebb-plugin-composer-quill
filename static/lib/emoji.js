@@ -55,6 +55,13 @@ define('quill-emoji', ['quill'], (quill) => {
 				super.format(name, value);
 			}
 		}
+
+		static value(domNode) {
+			return {
+				src: domNode.getAttribute('src'),
+				class: domNode.getAttribute('class'),
+			};
+		}
 	}
 	EmojiBlot.blotName = 'emoji';
 	quill.register(EmojiBlot);
