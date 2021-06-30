@@ -26,7 +26,7 @@ define('quill-emoji', ['quill'], (quill) => {
 
 	// Emoji Blot
 	const imageBlot = quill.import('formats/image');
-	const emojiAttributes = ['alt', 'class'];
+	const emojiAttributes = ['src', 'alt', 'class'];
 
 	class EmojiBlot extends imageBlot {
 		static create(value) {
