@@ -2,12 +2,12 @@
 
 /* globals $, document, window */
 
-$(document).ready(function () {
-	var wrapWithBlockquote = function (delta) {
+$(document).ready(() => {
+	const wrapWithBlockquote = function (delta) {
 		// Validate the delta
 		try {
-			var parsed = JSON.parse(delta);
-			parsed.ops = parsed.ops.map(function (op) {
+			const parsed = JSON.parse(delta);
+			parsed.ops = parsed.ops.map((op) => {
 				// eslint-disable-next-line prefer-object-spread
 				op.attributes = Object.assign({ blockquote: true }, op.attributes || {});
 				return op;
@@ -18,9 +18,9 @@ $(document).ready(function () {
 			return delta;
 		}
 	};
-	$(window).on('action:app.load', function () {
-		require(['composer', 'quill-nbb'], function (composer) {
-			$(window).on('action:composer.topic.new', function (ev, data) {
+	$(window).on('action:app.load', () => {
+		require(['composer', 'quill-nbb'], (composer) => {
+			$(window).on('action:composer.topic.new', (ev, data) => {
 				composer.newTopic({
 					cid: data.cid,
 					title: data.title,
@@ -28,15 +28,15 @@ $(document).ready(function () {
 				});
 			});
 
-			$(window).on('action:composer.post.edit', function (ev, data) {
+			$(window).on('action:composer.post.edit', (ev, data) => {
 				composer.editPost(data.pid);
 			});
 
-			$(window).on('action:composer.post.new', function (ev, data) {
+			$(window).on('action:composer.post.new', (ev, data) => {
 				composer.newReply(data.tid, data.pid, data.topicName, data.text);
 			});
 
-			$(window).on('action:composer.addQuote', function (ev, data) {
+			$(window).on('action:composer.addQuote', (ev, data) => {
 				composer.newReply(data.tid, data.pid, data.topicName, wrapWithBlockquote(data.text));
 			});
 		});
