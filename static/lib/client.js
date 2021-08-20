@@ -9,7 +9,7 @@ $(document).ready(() => {
 			const parsed = JSON.parse(delta);
 			parsed.ops = parsed.ops.map((op) => {
 				// eslint-disable-next-line prefer-object-spread
-				op.attributes = Object.assign({ blockquote: true }, op.attributes || {});
+				op.attributes = Object.assign({ mbq: true }, op.attributes || {});
 				return op;
 			});
 			return JSON.stringify(parsed);

@@ -240,9 +240,9 @@ $(window).on('action:chat.loaded', (evt, containerEl) => {
 
 window.quill.init = function (targetEl, data, callback) {
 	require([
-		'quill', 'quill-magic-url', 'quill-emoji',
+		'quill', 'quill-magic-url', 'quill-emoji', 'quill-mbq',
 		'composer/autocomplete', 'composer/drafts',
-	], (Quill, MagicUrl, Emoji, autocomplete, drafts) => {
+	], (Quill, MagicUrl, Emoji, _mbq, autocomplete, drafts) => {
 		const textDirection = $('html').attr('data-dir');
 		const textareaEl = targetEl.siblings('textarea');
 
@@ -395,6 +395,7 @@ window.quill.configureToolbar = async (targetEl, data) => {
 			[{ script: 'sub' }, { script: 'super' }], // superscript/subscript
 			[{ color: [] }, { background: [] }], // dropdown with defaults from theme
 			[{ align: [] }],
+			['mbq'],
 			['clean'],
 		],
 		handlers: {},

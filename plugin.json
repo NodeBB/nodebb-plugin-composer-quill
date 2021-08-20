@@ -25,7 +25,8 @@
 	"modules": {
 		"quill.js": "./node_modules/quill/dist/quill.js",
 		"quill-magic-url.js": "./node_modules/quill-magic-url/dist/index.js",
-		"quill-emoji.js": "./static/lib/emoji.js"
+		"quill-emoji.js": "./static/lib/emoji.js",
+		"quill-mbq.js": "./static/lib/mbq.js"
 	},
 	"acpScripts": [
 		"./static/lib/admin.js"
