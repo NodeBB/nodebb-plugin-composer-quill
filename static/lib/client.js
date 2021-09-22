@@ -14,8 +14,8 @@ $(document).ready(() => {
 			});
 			return JSON.stringify(parsed);
 		} catch (e) {
-			// Do nothing
-			return delta;
+			// It is probably just a text string, make your own delta(tm)
+			return JSON.stringify({ ops: [{ insert: `${delta}\n`, attributes: { blockquote: true } }] });
 		}
 	};
 	$(window).on('action:app.load', () => {
