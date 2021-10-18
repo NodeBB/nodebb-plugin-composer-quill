@@ -112,7 +112,7 @@ plugin.savePostQueue = async (data) => {
 
 plugin.saveChat = (data, callback) => {
 	if (data.system) {
-		return setImmediate(callback, null, data);
+		return callback(null, data);
 	}
 
 	data.quillDelta = data.content;
