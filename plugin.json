@@ -24,25 +24,23 @@
 	"modules": {
 		"quill.js": "./node_modules/quill/dist/quill.js",
 		"quill-magic-url.js": "./node_modules/quill-magic-url/dist/index.js",
-		"quill-emoji.js": "./static/lib/emoji.js"
+		"quill-emoji.js": "./static/lib/emoji.js",
+		"composer.js": "../nodebb-plugin-composer-default/static/lib/composer.js",
+		"composer/categoryList.js": "../nodebb-plugin-composer-default/static/lib/composer/categoryList.js",
+		"composer/controls.js": "../nodebb-plugin-composer-default/static/lib/composer/controls.js",
+		"composer/drafts.js": "../nodebb-plugin-composer-default/static/lib/composer/drafts.js",
+		"composer/formatting.js": "../nodebb-plugin-composer-default/static/lib/composer/formatting.js",
+		"composer/preview.js": "../nodebb-plugin-composer-default/static/lib/composer/preview.js",
+		"composer/resize.js": "../nodebb-plugin-composer-default/static/lib/composer/resize.js",
+		"composer/scheduler.js": "../nodebb-plugin-composer-default/static/lib/composer/scheduler.js",
+		"composer/tags.js": "../nodebb-plugin-composer-default/static/lib/composer/tags.js",
+		"composer/uploads.js": "../nodebb-plugin-composer-default/static/lib/composer/uploads.js",
+		"composer/autocomplete.js": "../nodebb-plugin-composer-default/static/lib/composer/autocomplete.js",
+		"../admin/plugins/composer-quill.js": "./static/lib/admin.js"
 	},
-	"acpScripts": [
-		"./static/lib/admin.js"
-	],
 	"scripts": [
 		"./static/lib/quill-nbb.js",
 		"./static/lib/client.js",
-		"../nodebb-plugin-composer-default/static/lib/composer.js",
-		"../nodebb-plugin-composer-default/static/lib/composer/autocomplete.js",
-		"../nodebb-plugin-composer-default/static/lib/composer/categoryList.js",
-		"../nodebb-plugin-composer-default/static/lib/composer/controls.js",
-		"../nodebb-plugin-composer-default/static/lib/composer/drafts.js",
-		"../nodebb-plugin-composer-default/static/lib/composer/formatting.js",
-		"../nodebb-plugin-composer-default/static/lib/composer/preview.js",
-		"../nodebb-plugin-composer-default/static/lib/composer/resize.js",
-		"../nodebb-plugin-composer-default/static/lib/composer/scheduler.js",
-		"../nodebb-plugin-composer-default/static/lib/composer/tags.js",
-		"../nodebb-plugin-composer-default/static/lib/composer/uploads.js",
 		"./node_modules/screenfull/dist/screenfull.js"
 	],
 	"templates": "static/templates"
