@@ -285,6 +285,8 @@ window.quill.init = function (targetEl, data, callback) {
 					}
 				}
 			});
+			// Show thumbs count
+			toolbarEl.find(`.ql-thumbs`).attr('data-format', 'thumbs');
 
 			$(window).trigger('action:quill.load', quill);
 
@@ -404,6 +406,28 @@ window.quill.configureToolbar = async (targetEl, data) => {
 	const toolbarHandlers = formatting.getDispatchTable();
 	const group = [];
 	data.formatting.forEach((option) => {
+		// -- Default composer compatibility: thumbs, tags, zen
+		if (option.name === 'thumbs') {
+			if (config.allowTopicsThumbnail && data.composerData.isMain) {
+				toolbar.handlers[option.name] = toolbarHandlers[option.name].bind(data.postContainer);
+				group.push(option.name);
+			}
+			return;
+		}
+		if (option.name === 'tags') {
+			if (option.visibility.desktop && ((data.composerData.isMain && option.visibility.main) || (!data.composerData.isMain && option.visibility.reply))) {
+				toolbar.handlers[option.name] = toolbarHandlers[option.name].bind(data.postContainer);
+				group.push(option.name);
+			}
+			return;
+		}
+		if (option.name === 'zen') {
+			if (option.visibility.desktop && ((data.composerData.isMain && option.visibility.main) || (!data.composerData.isMain && option.visibility.reply))) {
+				toolbar.handlers[option.name] = toolbarHandlers[option.name].bind(data.postContainer);
+				group.push(option.name);
+			}
+			return;
+		}
 		group.push(option.name);
 		toolbar.handlers[option.name] = function () {
 			// Chicken-wrapper to pass additional values to handlers (to match composer-default behaviour)

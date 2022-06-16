@@ -29,6 +29,23 @@
 		top: 6px;
 		left: -0.5px;
 	}
+
+	.ql-thumbs {
+		position: relative;
+
+		&[data-format="thumbs"][data-count]:after {
+			content: attr(data-count);
+			background: @brand-info;
+			color: white;
+			font-weight: 600;
+			position: absolute;
+			left: 50%;
+			bottom: 50%;
+			padding: 0px 5px;
+			border-radius: 5px;
+			font-size: 0.75em;
+		}
+	}
 }
 
 /* Safari bug.. */
