@@ -410,7 +410,7 @@ window.quill.configureToolbar = async (targetEl, data) => {
 			const quill = targetEl.data('quill');
 			const selection = quill.getSelection(true);
 			toolbarHandlers[option.name].apply(
-				quill,
+				data.postContainer,
 				[textareaEl.get(0), selection.index, selection.index + selection.length]
 			);
 		};
