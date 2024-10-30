@@ -23,21 +23,36 @@ $(document).ready(() => {
 			$(window).on('action:composer.topic.new', (ev, data) => {
 				composer.newTopic({
 					cid: data.cid,
+					title: data.title || '',
+					body: data.body || '',
+					tags: data.tags || [],
+				});
+			});
+
+			$(window).on('action:composer.post.edit', (ev, data) => {
+				composer.editPost({ pid: data.pid });
+			});
+
+			$(window).on('action:composer.post.new', (ev, data) => {
+				data.body = data.body || data.text;
+				data.title = data.title || data.topicName;
+				composer.newReply({
+					tid: data.tid,
+					toPid: data.pid,
 					title: data.title,
 					body: data.body,
 				});
 			});
 
-			$(window).on('action:composer.post.edit', (ev, data) => {
-				composer.editPost(data.pid);
-			});
-
-			$(window).on('action:composer.post.new', (ev, data) => {
-				composer.newReply(data.tid, data.pid, data.topicName, data.text);
-			});
-
 			$(window).on('action:composer.addQuote', (ev, data) => {
-				composer.newReply(data.tid, data.pid, data.topicName, wrapWithBlockquote(data.text));
+				data.title = data.title || data.topicName;
+				data.body = data.body || data.text;
+				composer.newReply({
+					tid: data.tid,
+					toPid: data.pid,
+					title: data.title,
+					body: wrapWithBlockquote(data.body),
+				});
 			});
 		});
 	});
