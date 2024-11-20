@@ -281,7 +281,7 @@ window.quill.init = function (targetEl, data, callback) {
 					if (className === 'picture') {
 						buttonEl.html('<i class="fa fa-file-image-o"></i>');
 					} else {
-						buttonEl.html('<span class="fa-stack"><i class="fa fa-file-o fa-stack-1x"></i><i class="fa fa-arrow-up fa-stack-1x"></i></span>');
+						buttonEl.html('<i class="fa fa-file-o"></i>');
 					}
 				}
 			});

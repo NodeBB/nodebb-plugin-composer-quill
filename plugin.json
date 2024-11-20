@@ -15,11 +15,11 @@
 		{ "hook": "filter:messaging.getFields", "method": "handleMessageEdit" },
 		{ "hook": "filter:messaging.checkContent", "method": "handleMessageCheck" }
 	],
-	"less": [
-		"../nodebb-plugin-composer-default/static/less/composer.less",
-		"./static/less/quill.less",
-		"./static/less/post.less",
-		"./static/less/overrides.less"
+	"scss": [
+		"../nodebb-plugin-composer-default/static/scss/composer.scss",
+		"./static/scss/quill.scss",
+		"./static/scss/post.scss",
+		"./static/scss/overrides.scss"
 	],
 	"modules": {
 		"quill.js": "./node_modules/quill/dist/quill.js",
@@ -36,6 +36,7 @@
 		"composer/tags.js": "../nodebb-plugin-composer-default/static/lib/composer/tags.js",
 		"composer/uploads.js": "../nodebb-plugin-composer-default/static/lib/composer/uploads.js",
 		"composer/autocomplete.js": "../nodebb-plugin-composer-default/static/lib/composer/autocomplete.js",
+		"composer/post-queue.js": "../nodebb-plugin-composer-default/static/lib/composer/post-queue.js",
 		"../admin/plugins/composer-quill.js": "./static/lib/admin.js"
 	},
 	"scripts": [

@@ -1,0 +1,31 @@
+.composer {
+	.formatting-bar {
+		display: none!important;
+	}
+
+	.write-container {
+		width: 100%!important;
+		min-width: 0px;	// fixes negation of overflow-wrap due this being a flex-item
+
+		textarea {
+			display: none;
+		}
+	}
+}
+
+.ql-toolbar {
+	button > i {
+		float: left;
+		height: 100%;
+	}
+}
+
+[component="chat/composer"] {
+	.ql-editor {
+		padding: 0;
+	}
+
+	[component="chat/input"] {
+		display: none;
+	}
+}
