@@ -11,7 +11,8 @@ define('quill-nbb', [
 	'composer/resize',
 	'components',
 	'slugify',
-], (Quill, resize, components, slugify) => {
+	'alerts',
+], (Quill, resize, components, slugify, alerts) => {
 	$(window).on('action:composer.loaded', (ev, data) => {
 		const postContainer = $(`.composer[data-uuid="${data.post_uuid}"]`);
 		const targetEl = postContainer.find('.write-container div');
@@ -70,34 +71,19 @@ define('quill-nbb', [
 			value = JSON.parse(value);
 			quill.setContents(value, 'user');
 		} catch (e) {
-			app.alertError('[[error:invalid-json]]');
+			alerts.error('[[error:invalid-json]]');
 		}
 	});
 
 	$(window).on('action:composer.uploadUpdate', (evt, data) => {
-		const filename = data.filename.replace(/^\d+_\d+_/, '');
-		const alertId = generateAlertId(data.post_uuid, filename);
-		if (!window.quill.uploads[filename]) {
-			console.warn(`[quill/uploads] Unable to find file (${filename}).`);
-			app.removeAlert(alertId);
-			return;
-		}
-
-		if (!data.text.startsWith('/')) {
-			app.alert({
-				alert_id: alertId,
-				title: data.filename.replace(/\d_\d+_/, ''),
-				message: data.text,
-				timeout: 1000,
-			});
-		}
+		// Upload-Progress wird global von uploadHelpers gehandhabt
 	});
 
 	$(window).on('action:composer.upload', (evt, data) => {
 		const quill = components.get('composer').filter(`[data-uuid="${data.post_uuid}"]`).find('.ql-container').data('quill');
 		data.files.forEach((file) => {
 			const alertId = generateAlertId(data.post_uuid, file.filename);
-			app.removeAlert(alertId);
+			alerts.remove(alertId);
 
 			// Image vs. file upload
 			if (file.isImage) {
@@ -129,13 +115,7 @@ define('quill-nbb', [
 	});
 
 	$(window).on('action:composer.uploadStart', (evt, data) => {
-		data.files.forEach((file) => {
-			app.alert({
-				alert_id: generateAlertId(data.post_uuid, file.filename),
-				title: file.filename.replace(/\d_\d+_/, ''),
-				message: data.text,
-			});
-		});
+		// Upload-Start-Toast wird global von uploadHelpers gehandhabt
 	});
 
 	$(window).on('action:composer.insertIntoTextarea', (evt, data) => {
@@ -420,7 +400,10 @@ window.quill.configureToolbar = async (targetEl, data) => {
 		if (app.user.privileges[privilege]) {
 			const name = privilege === 'upload:post:image' ? 'picture' : 'upload';
 			group.unshift(name);
-			toolbar.handlers[name] = toolbarHandlers[name].bind($('.formatting-bar'));
+			// Handler im Kontext des aktiven Composers ausführen
+			toolbar.handlers[name] = function () {
+				return toolbarHandlers[name].apply(data.postContainer, arguments);
+			};
 		}
 	});
 	toolbar.container.push(group);
