@@ -76,7 +76,7 @@ define('quill-nbb', [
 	});
 
 	$(window).on('action:composer.uploadUpdate', (evt, data) => {
-		// Upload-Progress wird global von uploadHelpers gehandhabt
+		// Upload progress is handled globally by uploadHelpers
 	});
 
 	$(window).on('action:composer.upload', (evt, data) => {
@@ -115,7 +115,7 @@ define('quill-nbb', [
 	});
 
 	$(window).on('action:composer.uploadStart', (evt, data) => {
-		// Upload-Start-Toast wird global von uploadHelpers gehandhabt
+		// Upload start toast is handled globally by uploadHelpers
 	});
 
 	$(window).on('action:composer.insertIntoTextarea', (evt, data) => {
@@ -400,7 +400,7 @@ window.quill.configureToolbar = async (targetEl, data) => {
 		if (app.user.privileges[privilege]) {
 			const name = privilege === 'upload:post:image' ? 'picture' : 'upload';
 			group.unshift(name);
-			// Handler im Kontext des aktiven Composers ausführen
+			// Execute handler in the context of the active composer instance
 			toolbar.handlers[name] = function () {
 				return toolbarHandlers[name].apply(data.postContainer, arguments);
 			};
