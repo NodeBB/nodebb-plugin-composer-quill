@@ -24,6 +24,7 @@
 	"modules": {
 		"quill.js": "./node_modules/quill/dist/quill.js",
 		"quill-magic-url.js": "./node_modules/quill-magic-url/dist/index.js",
+		"quill-markdown-shortcuts.js": "./node_modules/quill-markdown-shortcuts/dist/markdownShortcuts.js",
 		"quill-emoji.js": "./static/lib/emoji.js",
 		"composer.js": "../nodebb-plugin-composer-default/static/lib/composer.js",
 		"composer/categoryList.js": "../nodebb-plugin-composer-default/static/lib/composer/categoryList.js",
