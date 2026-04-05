@@ -444,7 +444,6 @@ window.quill.isEmpty = function (quill) {
 		if (attributes) {
 			return false;
 		}
-		console.log('quill value:', value);
 		return value === '';
 	}
 
