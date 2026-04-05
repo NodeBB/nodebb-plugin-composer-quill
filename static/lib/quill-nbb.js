@@ -240,9 +240,9 @@ $(window).on('action:chat.loaded', (evt, containerEl) => {
 
 window.quill.init = function (targetEl, data, callback) {
   require([
-		'quill', 'quill-magic-url', 'quill-emoji',
+		'quill', 'quill-magic-url', 'quill-emoji', 'quill-markdown-shortcuts',
 		'composer/autocomplete', 'composer/drafts',
-	], (Quill, MagicUrl, Emoji, autocomplete, drafts) => {
+	], (Quill, MagicUrl, Emoji, MarkdownShortcuts, autocomplete, drafts) => {
     const textDirection = $('html').attr('data-dir');
     const textareaEl = targetEl.siblings('textarea');
 
