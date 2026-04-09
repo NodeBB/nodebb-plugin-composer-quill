@@ -241,20 +241,24 @@ $(window).on('action:chat.loaded', (evt, containerEl) => {
 
 window.quill.init = function (targetEl, data, callback) {
 	require([
-		'quill', 'quill-magic-url', 'quill-emoji', 'quill-markdown-shortcuts',
+		'quill', 'quill-magic-url', 'quill-emoji', 'quill-markdown-shortcuts', 'quill-table',
 		'composer/autocomplete', 'composer/drafts',
-	], (Quill, MagicUrl, Emoji, MarkdownShortcuts, autocomplete, drafts) => {
+	], (Quill, MagicUrl, Emoji, MarkdownShortcuts, TableModule, autocomplete, drafts) => {
 		const textDirection = $('html').attr('data-dir');
 		const textareaEl = targetEl.siblings('textarea');
 
-		window.quill.configureToolbar(targetEl, data).then(({ toolbar }) => {
+		window.quill.configureToolbar(targetEl, data, TableModule).then(({ toolbar }) => {
 			// Quill...
 			Quill.register('modules/magicUrl', MagicUrl.default);
 			Quill.register('modules/markdownShortcuts', MarkdownShortcuts);
+			Quill.register('modules/table', TableModule);
 			const quill = new Quill(targetEl.get(0), {
 				theme: data.theme || 'snow',
 				modules: {
 					toolbar,
+					table: {
+						cellSelectionOnClick: false,
+					},
 					magicUrl: {
 						normalizeUrlOptions: {
 							sortQueryParameters: false,
@@ -383,7 +387,7 @@ window.quill.init = function (targetEl, data, callback) {
 	return window.quill;
 };
 
-window.quill.configureToolbar = async (targetEl, data) => {
+window.quill.configureToolbar = async (targetEl, data, TableModule) => {
 	const textareaEl = targetEl.siblings('textarea');
 	const [formatting, hooks] = await new Promise((resolve) => {
 		require(['composer/formatting', 'hooks'], (...libs) => resolve(libs));
@@ -395,6 +399,26 @@ window.quill.configureToolbar = async (targetEl, data) => {
 			['bold', 'italic', 'underline', 'strike'], // toggled buttons
 			['link', 'blockquote', 'code-block'],
 			[{ list: 'ordered' }, { list: 'bullet' }],
+			[{ table: TableModule.tableOptions() }, {
+				table: [
+					'insert',
+					'remove-table',
+					'split-cell',
+					'merge-selection',
+					'append-row-above',
+					'append-row-below',
+					'append-col-before',
+					'append-col-after',
+					'remove-col',
+					'remove-row',
+					'remove-cell',
+					'remove-selection',
+					'hide-border',
+					'show-border',
+					'undo',
+					'redo',
+				],
+			}],
 			[{ script: 'sub' }, { script: 'super' }], // superscript/subscript
 			[{ color: [] }, { background: [] }], // dropdown with defaults from theme
 			[{ align: [] }],
