@@ -16,4 +16,100 @@
 	.ql-font-monospace {
 		font-family: Monaco, "Courier New", monospace;
 	}
+
+	/* 表格视觉变量：默认浅色；仅当祖先带 .dark 或 .dark 时切换深色描边（不与系统 prefers-color-scheme 联动） */
+	table {
+		/* 原 0.14 在白底上极易被看成「无边框」；0.18 仍为浅边，可读性更好；可用变量改回 0.14 */
+		--ql-table-border: rgba(23, 26, 29, 0.18);
+		--ql-table-bg: transparent;
+		--ql-table-cell-bg: transparent;
+		--ql-table-selected-bg: rgba(59, 130, 246, 0.14);
+		--ql-table-font-size: 16px;
+		--ql-table-line-height: 1.7;
+		--ql-table-padding: 8px;
+		width: 100%;
+		border-collapse: collapse;
+		table-layout: fixed;
+		/* 勿与 border-radius 同用：在 Chromium/WebKit 下常导致 collapse 表格的格线被裁掉或完全不画 */
+		overflow: visible;
+		white-space: nowrap;
+		font-size: var(--ql-table-font-size);
+		line-height: var(--ql-table-line-height);
+		background-color: var(--ql-table-bg);
+		border-radius: 8px;
+		/* 外轮廓：collapse 下仅 td 边线在部分浏览器不可靠，表格外框保证浅色模式下可见 */
+		border: 1px solid var(--ql-table-border);
+	}
+
+	/* @media (prefers-color-scheme: dark) {
+	table {
+		--ql-table-border: rgba(255, 255, 255, 0.12);
+		--ql-table-selected-bg: rgba(96, 165, 250, 0.18);
+	}
+	} */
+
+	.dark  table,
+	.dark table {
+		--ql-table-border: rgba(255, 255, 255, 0.12);
+		--ql-table-selected-bg: rgba(96, 165, 250, 0.18);
+	}
+
+	table td {
+		border: 1px solid var(--ql-table-border);
+		padding: var(--ql-table-padding);
+		min-height: calc(var(--ql-table-padding) * 2 + var(--ql-table-line-height) * 1em);
+		vertical-align: top;
+		white-space: pre-wrap; /* https://github.com/quilljs/quill/issues/1760 */
+		font-size: inherit;
+		line-height: inherit;
+		background-color: var(--ql-table-cell-bg);
+	}
+
+	.ql-editor__table--hideBorder td {
+		border: none !important;
+	}
+
+	.ql-editor__table--hideBorder {
+		border: none !important;
+	}
+
+	table td[rowspan="2"] {
+		min-height: calc(var(--ql-table-padding) * 2 + 2 * var(--ql-table-line-height) * 1em);
+	}
+
+	table td[rowspan="3"] {
+		min-height: calc(var(--ql-table-padding) * 2 + 3 * var(--ql-table-line-height) * 1em);
+	}
+
+	table td[rowspan="4"] {
+		min-height: calc(var(--ql-table-padding) * 2 + 4 * var(--ql-table-line-height) * 1em);
+	}
+
+	table td[rowspan="5"] {
+		min-height: calc(var(--ql-table-padding) * 2 + 5 * var(--ql-table-line-height) * 1em);
+	}
+
+	table td[rowspan="6"] {
+		min-height: calc(var(--ql-table-padding) * 2 + 6 * var(--ql-table-line-height) * 1em);
+	}
+
+	table td[rowspan="7"] {
+		min-height: calc(var(--ql-table-padding) * 2 + 7 * var(--ql-table-line-height) * 1em);
+	}
+
+	table td[rowspan="8"] {
+		min-height: calc(var(--ql-table-padding) * 2 + 8 * var(--ql-table-line-height) * 1em);
+	}
+
+	table td[rowspan="9"] {
+		min-height: calc(var(--ql-table-padding) * 2 + 9 * var(--ql-table-line-height) * 1em);
+	}
+
+	table td.ql-cell-selected {
+		background-color: var(--ql-table-selected-bg);
+	}
+
+	table td[merge_id] {
+		display: none;
+	}
 }
