@@ -76,23 +76,7 @@ define('quill-nbb', [
 	});
 
 	$(window).on('action:composer.uploadUpdate', (evt, data) => {
-		// when update progress the filename use timestamp, so we need to remove timestamp
-		const filename = data.filename.replace(/^\d+_\d+_/, '');
-		const alertId = generateAlertId(data.post_uuid, filename);
-		if (!window.quill.uploads[filename]) {
-			console.warn(`[quill/uploads] Unable to find file (${filename}).`);
-			alerts.remove(alertId);
-			return;
-		}
-
-		if (!data.text.startsWith('/')) {
-			alerts.alert({
-				alert_id: alertId,
-				title: data.filename.replace(/\d_\d+_/, ''),
-				message: data.text,
-				timeout: 1000,
-			});
-		}
+		// Upload progress is handled globally by uploadHelpers
 	});
 
 	$(window).on('action:composer.upload', (evt, data) => {
@@ -427,7 +411,9 @@ window.quill.configureToolbar = async (targetEl, data) => {
 		if (app.user.privileges[privilege]) {
 			const name = privilege === 'upload:post:image' ? 'picture' : 'upload';
 			group.unshift(name);
-			toolbar.handlers[name] = toolbarHandlers[name].bind($('.formatting-bar'));
+			toolbar.handlers[name] = function () {
+				return toolbarHandlers[name].apply(data.postContainer, arguments);
+			};
 		}
 	});
 	toolbar.container.push(group);
