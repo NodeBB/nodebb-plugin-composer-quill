@@ -391,7 +391,7 @@ window.quill.configureToolbar = async (targetEl, data) => {
 	const toolbarHandlers = formatting.getDispatchTable();
 	const group = [];
 	data.formatting.forEach((option) => {
-		const ignoreNames = ['tags', 'thumbs'];
+		const ignoreNames = ['tags', 'thumbs', 'picture', 'upload'];
 		if (ignoreNames.includes(option.name)) {
 			return;
 		}
