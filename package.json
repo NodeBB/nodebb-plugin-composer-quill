@@ -23,7 +23,7 @@
   },
   "readmeFilename": "README.md",
   "nbbpm": {
-    "compatibility": "^3.2.0"
+    "compatibility": "^4.14.0"
   },
   "dependencies": {
     "async": "^3.2.0",
